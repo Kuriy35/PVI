@@ -1,0 +1,25 @@
+.mainpage {
+  display: flex;
+  min-height: 100vh;
+}
+
+.content {
+  flex-grow: 1;
+  padding: 30px;
+}
+
+@media screen and (max-width: 768px) {
+  .mainpage {
+    flex-direction: column;
+  }
+
+  .navbar {
+    max-width: 100%;
+    flex-grow: 0;
+    padding-top: 0px;
+  }
+
+  .navbar li {
+    text-align: center;
+  }
+}

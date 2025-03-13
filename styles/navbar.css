@@ -1,0 +1,23 @@
+.navbar {
+  background-color: #3e4e55;
+  color: #ecf0f1;
+  padding-top: 25px;
+  flex-grow: 0.15;
+  max-width: 250px;
+}
+
+.navbar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.navbar li {
+  padding: 15px 35px;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.navbar ul li:hover {
+  background-color: #495057;
+}
