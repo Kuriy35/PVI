@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Students</title>
+  </head>
+  <body>
+    <div>
+      <h1 class="page-header">Students</h1>
+      <div class="btn-action btn-success btn-position-right">
+        <button
+          id="btn-add"
+          type="button"
+          onclick="openModalWindow('modal-add-student')"
+        >
+          +
+        </button>
+      </div>
+      <div id="modal-add-student" class="modal-student-data">
+        <div class="modal-content-student-data">
+          <div class="modal-student-data-header">
+            <div class="btn-action btn-danger btn-position-right">
+              <button
+                type="button"
+                onclick="closeModalWindow('modal-add-student')"
+              >
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <h1 class="page-header">Add student</h1>
+          </div>
+          <hr />
+          <div class="modal-student-data-body">
+            <form action="javascript:void(0);" id="form-add-student">
+              <div class="input-student-data-container">
+                <label for="input-group-select">Group</label>
+                <select
+                  id="input-group-select"
+                  class="input-student-data-field"
+                >
+                  <option value="" disabled selected>Select Group</option>
+                  <option value="PZ-21">PZ-21</option>
+                  <option value="PZ-22">PZ-22</option>
+                  <option value="PZ-23">PZ-23</option>
+                </select>
+              </div>
+              <div class="input-student-data-container">
+                <label for="input-first-name">First name</label>
+                <input
+                  type="text"
+                  id="input-first-name"
+                  class="input-student-data-field"
+                />
+              </div>
+              <div class="input-student-data-container">
+                <label for="input-last-name">Last name</label>
+                <input
+                  type="text"
+                  id="input-last-name"
+                  class="input-student-data-field"
+                />
+              </div>
+              <div class="input-student-data-container">
+                <label for="input-gender-select">Gender</label>
+                <select
+                  id="input-gender-select"
+                  class="input-student-data-field"
+                >
+                  <option value="" disabled selected>Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
+              <div class="input-student-data-container">
+                <label for="input-birthday-date">Birthday</label>
+                <input
+                  type="date"
+                  id="input-birthday-date"
+                  class="input-student-data-field"
+                />
+              </div>
+            </form>
+          </div>
+          <hr />
+          <div class="modal-student-data-footer">
+            <div class="btn-action btn-danger">
+              <button
+                type="button"
+                onclick="closeModalWindow('modal-add-student')"
+              >
+                Cancel
+              </button>
+            </div>
+            <div class="btn-action btn-success">
+              <button type="button">Create</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="modal-edit-student" class="modal-student-data">
+        <div class="modal-content-student-data">
+          <div class="modal-student-data-header">
+            <div class="btn-action btn-danger btn-position-right">
+              <button
+                type="button"
+                onclick="closeModalWindow('modal-edit-student')"
+              >
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <h1 class="page-header">Edit student</h1>
+          </div>
+          <hr />
+          <div class="modal-student-data-body">
+            <form action="javascript:void(0);" id="form-add-student">
+              <div class="input-student-data-container">
+                <label for="input-group-select">Group</label>
+                <select
+                  id="input-group-select"
+                  class="input-student-data-field"
+                >
+                  <option value="" disabled selected>Select Group</option>
+                  <option value="PZ-21">PZ-21</option>
+                  <option value="PZ-22">PZ-22</option>
+                  <option value="PZ-23">PZ-23</option>
+                </select>
+              </div>
+              <div class="input-student-data-container">
+                <label for="input-first-name">First name</label>
+                <input
+                  type="text"
+                  id="input-first-name"
+                  class="input-student-data-field"
+                />
+              </div>
+              <div class="input-student-data-container">
+                <label for="input-last-name">Last name</label>
+                <input
+                  type="text"
+                  id="input-last-name"
+                  class="input-student-data-field"
+                />
+              </div>
+              <div class="input-student-data-container">
+                <label for="input-gender-select">Gender</label>
+                <select
+                  id="input-gender-select"
+                  class="input-student-data-field"
+                >
+                  <option value="" disabled selected>Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
+              <div class="input-student-data-container">
+                <label for="input-birthday-date">Birthday</label>
+                <input
+                  type="date"
+                  id="input-birthday-date"
+                  class="input-student-data-field"
+                />
+              </div>
+            </form>
+          </div>
+          <hr />
+          <div class="modal-student-data-footer">
+            <div class="btn-action btn-danger">
+              <button
+                type="button"
+                onclick="closeModalWindow('modal-edit-student')"
+              >
+                Cancel
+              </button>
+            </div>
+            <div class="btn-action btn-success">
+              <button type="button">Create</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="modal-delete-student" class="modal-student-remove">
+        <div class="modal-content-student-remove">
+          <div class="modal-student-remove-header">
+            <div class="btn-action btn-danger btn-position-right">
+              <button
+                type="button"
+                onclick="closeModalWindow('modal-delete-student')"
+              >
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <h1 class="page-header">Warning</h1>
+          </div>
+          <hr />
+          <div class="modal-student-remove-body">
+            <div>Are you sure you want tot delete user ...?</div>
+          </div>
+          <hr />
+          <div class="modal-student-remove-footer">
+            <div class="btn-action btn-danger">
+              <button
+                type="button"
+                onclick="closeModalWindow('modal-delete-student')"
+              >
+                Cancel
+              </button>
+            </div>
+            <div class="btn-action btn-success">
+              <button type="button">Create</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="table-students">
+        <table>
+          <tr>
+            <th>
+              <input type="checkbox" />
+            </th>
+            <th>Group</th>
+            <th>Name</th>
+            <th>Gender</th>
+            <th>Birthday</th>
+            <th>Status</th>
+            <th>Options</th>
+          </tr>
+          <tr>
+            <td>
+              <input type="checkbox" />
+            </td>
+            <td>PZ-21</td>
+            <td>Yurii Kozenko</td>
+            <td>M</td>
+            <td>03.12.2005</td>
+            <td>
+              <span class="status-user online"></span>
+            </td>
+            <td>
+              <div class="btn-action">
+                <button
+                  type="button"
+                  onclick="openModalWindow('modal-edit-student')"
+                >
+                  <i class="fa-solid fa-pencil"></i>
+                </button>
+                <button type="button"
+                onclick="openModalWindow('modal-delete-student')">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <input type="checkbox" />
+            </td>
+            <td>PZ-21</td>
+            <td>Armandik Friend</td>
+            <td>M</td>
+            <td>01.10.2006</td>
+            <td>
+              <span class="status-user offline"></span>
+            </td>
+            <td>
+              <div class="btn-action">
+                <button
+                  type="button"
+                  onclick="openModalWindow('modal-edit-student')"
+                >
+                  <i class="fa-solid fa-pencil"></i>
+                </button 
+                type="button"
+                onclick="openModalWindow('modal-delete-student')">
+                <button>
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div class="menu-pagination">
+        <a href="#" class="menu-pagination-element">&lt;</a>
+        <a href="#" class="menu-pagination-element current-page">1</a>
+        <a href="#" class="menu-pagination-element">2</a>
+        <a href="#" class="menu-pagination-element">3</a>
+        <a href="#" class="menu-pagination-element">4</a>
+        <a href="#" class="menu-pagination-element">&gt;</a>
+      </div>
+    </div>
+  </body>
+</html>
