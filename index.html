@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./styles/header.css" />
+    <link rel="stylesheet" href="./styles/navbar.css" />
+    <link rel="stylesheet" href="./styles/studentspage.css" />
+    <link rel="stylesheet" href="./styles/main.css" />
+    <link rel="stylesheet" href="./styles/dropdown.css" />
+    <link rel="stylesheet" href="./styles/modalwindows.css" />
+    <script
+      src="https://kit.fontawesome.com/12f39570aa.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="./scripts/loadcontent.js"></script>
+    <script src="./scripts/modalwindows.js"></script>
+    <title>CMS</title>
+  </head>
+  <body onload="loadPage('./pages/students.html')">
+    <div>
+      <header class="header">
+        <div class="logo" onclick="loadPage('./pages/students.html')">CMS</div>
+        <div class="header-right">
+          <div class="dropdown">
+            <i
+              class="fa-regular fa-bell"
+              onclick="loadPage('./pages/messages.html')"
+            >
+            </i>
+            <div class="dropdown-content">
+              <div class="dropdown-content-element">
+                <div class="user-profile">
+                  <i class="fa-solid fa-circle-user"></i>
+                  <div>Yurii Kozenko</div>
+                </div>
+                <span>Some text</span>
+              </div>
+              <div class="dropdown-content-element">
+                <div class="user-profile">
+                  <i class="fa-solid fa-circle-user"></i>
+                  <div>Yurii Kozenko</div>
+                </div>
+                <span>Some text</span>
+              </div>
+              <div class="dropdown-content-element">
+                <div class="user-profile">
+                  <i class="fa-solid fa-circle-user"></i>
+                  <div>Yurii Kozenko</div>
+                </div>
+                <span>Some text</span>
+              </div>
+            </div>
+          </div>
+          <div class="dropdown">
+            <div class="user-profile-bar">
+              <i class="fa-solid fa-circle-user"></i>
+              <div id="logged-in-username">Yurii Kozenko</div>
+            </div>
+            <div class="dropdown-content">
+              <div class="dropdown-content-element">Profile</div>
+              <div class="dropdown-content-element">Log Out</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="mainpage">
+        <nav class="navbar">
+          <ul>
+            <li onclick="loadPage('./pages/dashboard.html')">Dashboard</li>
+            <li onclick="loadPage('./pages/students.html')">Students</li>
+            <li onclick="loadPage('./pages/tasks.html')">Tasks</li>
+          </ul>
+        </nav>
+
+        <main class="content"></main>
+      </div>
+    </div>
+  </body>
+</html>
