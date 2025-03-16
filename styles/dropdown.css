@@ -3,27 +3,64 @@
   display: inline-block;
 }
 
-.dropdown-content {
+.dropdown-content-messages {
   display: none;
   position: absolute;
+  transform: translateX(-30%);
   background-color: #ffffff;
-  min-width: 180px;
+  min-width: 230px;
   box-shadow: 0px 5px 12px 3px rgba(0, 0, 0, 0.3);
 }
 
-.dropdown:hover .dropdown-content {
+.dropdown:hover .dropdown-content-messages {
   display: block;
 }
-.dropdown-content-element {
-  gap: 5px;
+.dropdown-content-messages-element {
+  color: black;
+  padding: 8px 16px;
+}
+
+.dropdown-content-messages-element:hover {
+  background-color: #bfd6d2;
+}
+
+.sender-profile {
+  display: flex;
+  align-items: flex-end;
+  gap: 7px;
+}
+
+.sender-avatar {
+  font-size: 24px;
+}
+
+.sender-name {
+  font-size: 16px;
+}
+
+.received-message-content {
+  margin-top: 5px;
+  font-size: 14px;
+  color: gray;
+}
+
+.dropdown-content-user {
+  display: none;
+  position: absolute;
+  transform: translateX(10%);
+  background-color: #ffffff;
+  min-width: 150px;
+  box-shadow: 0px 5px 12px 3px rgba(0, 0, 0, 0.3);
+}
+
+.dropdown:hover .dropdown-content-user {
+  display: block;
+}
+.dropdown-content-user-element {
   color: black;
   padding: 12px 16px;
 }
 
-.dropdown-content-element:hover {
+.dropdown-content-user-element:hover {
   background-color: #bfd6d2;
-}
-
-.user-profile {
-  display: flex;
 }

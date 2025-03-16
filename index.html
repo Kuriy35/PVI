@@ -13,8 +13,6 @@
       src="https://kit.fontawesome.com/12f39570aa.js"
       crossorigin="anonymous"
     ></script>
-    <script src="./scripts/loadcontent.js"></script>
-    <script src="./scripts/modalwindows.js"></script>
     <title>CMS</title>
   </head>
   <body onload="loadPage('./pages/students.html')">
@@ -23,32 +21,31 @@
         <div class="logo" onclick="loadPage('./pages/students.html')">CMS</div>
         <div class="header-right">
           <div class="dropdown">
-            <i
-              class="fa-regular fa-bell"
-              onclick="loadPage('./pages/messages.html')"
-            >
-            </i>
-            <div class="dropdown-content">
-              <div class="dropdown-content-element">
-                <div class="user-profile">
-                  <i class="fa-solid fa-circle-user"></i>
-                  <div>Yurii Kozenko</div>
+            <div id="bellContainer">
+              <i id="notificationBell" class="fa-regular fa-bell"></i>
+              <span id="notificationIndicator" class="bell-indicator">0</span>
+            </div>
+            <div class="dropdown-content-messages">
+              <div class="dropdown-content-messages-element">
+                <div class="sender-profile">
+                  <i class="fa-solid fa-circle-user sender-avatar"></i>
+                  <div class="sender-name">Yurii Kozenko</div>
                 </div>
-                <span>Some text</span>
+                <div class="received-message-content">Some text</div>
               </div>
-              <div class="dropdown-content-element">
-                <div class="user-profile">
-                  <i class="fa-solid fa-circle-user"></i>
-                  <div>Yurii Kozenko</div>
+              <div class="dropdown-content-messages-element">
+                <div class="sender-profile">
+                  <i class="fa-solid fa-circle-user sender-avatar"></i>
+                  <div class="sender-name">Yurii Kozenko</div>
                 </div>
-                <span>Some text</span>
+                <div class="received-message-content">Some text</div>
               </div>
-              <div class="dropdown-content-element">
-                <div class="user-profile">
-                  <i class="fa-solid fa-circle-user"></i>
-                  <div>Yurii Kozenko</div>
+              <div class="dropdown-content-messages-element">
+                <div class="sender-profile">
+                  <i class="fa-solid fa-circle-user sender-avatar"></i>
+                  <div class="sender-name">Yurii Kozenko</div>
                 </div>
-                <span>Some text</span>
+                <div class="received-message-content">Some text</div>
               </div>
             </div>
           </div>
@@ -57,16 +54,15 @@
               <i class="fa-solid fa-circle-user"></i>
               <div id="logged-in-username">Yurii Kozenko</div>
             </div>
-            <div class="dropdown-content">
-              <div class="dropdown-content-element">Profile</div>
-              <div class="dropdown-content-element">Log Out</div>
+            <div class="dropdown-content-user">
+              <div class="dropdown-content-user-element">Profile</div>
+              <div class="dropdown-content-user-element">Log Out</div>
             </div>
           </div>
         </div>
       </header>
-
       <div class="mainpage">
-        <nav class="navbar">
+        <nav id="bellEvent" class="navbar">
           <ul>
             <li onclick="loadPage('./pages/dashboard.html')">Dashboard</li>
             <li onclick="loadPage('./pages/students.html')">Students</li>
@@ -77,5 +73,8 @@
         <main class="content"></main>
       </div>
     </div>
+
+    <script src="./scripts/loadcontent.js"></script>
+    <script src="./scripts/modalwindows.js"></script>
   </body>
 </html>
