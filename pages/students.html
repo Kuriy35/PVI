@@ -8,14 +8,20 @@
   <body>
     <div>
       <h1 class="page-header">Students</h1>
-      <div class="btn-action btn-success btn-position-right">
-        <button id="btn-add" type="button">+</button>
+      <div class="btn-position-right">
+        <button class="btn-action btn-success" id="btn-add" type="button">
+          +
+        </button>
       </div>
       <div id="modal-input-student" class="modal-student-data">
         <div class="modal-content-student-data">
           <div class="modal-student-data-header">
-            <div class="btn-action btn-danger btn-position-right">
-              <button id="btn-modal-close-x" type="button">
+            <div class="btn-position-right">
+              <button
+                class="btn-action btn-danger"
+                id="btn-modal-close-x"
+                type="button"
+              >
                 <i class="fa-solid fa-xmark"></i>
               </button>
             </div>
@@ -24,11 +30,7 @@
             </h1>
           </div>
           <hr />
-          <form
-            action="javascript:void(0);"
-            id="form-input-student"
-            class="modal-student-data-body"
-          >
+          <form action="javascript:void(0);" class="modal-student-data-body">
             <div class="input-student-data-container">
               <label for="input-group-select">Group</label>
               <select id="input-group-select" class="input-student-data-field">
@@ -37,6 +39,9 @@
                 <option value="PZ-22">PZ-22</option>
                 <option value="PZ-23">PZ-23</option>
               </select>
+              <span id="groupSelectErrorMsg" class="validation-error-output"
+                >123</span
+              >
             </div>
             <div class="input-student-data-container">
               <label for="input-first-name">First name</label>
@@ -45,6 +50,9 @@
                 id="input-first-name"
                 class="input-student-data-field"
               />
+              <span id="firstNameErrorMsg" class="validation-error-output"
+                >123</span
+              >
             </div>
             <div class="input-student-data-container">
               <label for="input-last-name">Last name</label>
@@ -53,6 +61,9 @@
                 id="input-last-name"
                 class="input-student-data-field"
               />
+              <span id="lastNameErrorMsg" class="validation-error-output"
+                >123</span
+              >
             </div>
             <div class="input-student-data-container">
               <label for="input-gender-select">Gender</label>
@@ -61,6 +72,9 @@
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
               </select>
+              <span id="genderErrorMsg" class="validation-error-output"
+                >123</span
+              >
             </div>
             <div class="input-student-data-container">
               <label for="input-birthday-date">Birthday</label>
@@ -69,15 +83,30 @@
                 id="input-birthday-date"
                 class="input-student-data-field"
               />
+              <span id="birthdayErrorMsg" class="validation-error-output"
+                >123</span
+              >
             </div>
           </form>
           <hr />
           <div class="modal-student-data-footer">
-            <div class="btn-action btn-danger">
-              <button id="btn-modal-close-ok" type="button">Cancel</button>
+            <div>
+              <button
+                class="btn-action btn-danger"
+                id="btn-modal-close-ok"
+                type="button"
+              >
+                Cancel
+              </button>
             </div>
-            <div class="btn-action btn-success">
-              <button type="button">Create</button>
+            <div>
+              <button
+                class="btn-action btn-success"
+                id="submitStudentDataBtn"
+                type="button"
+              >
+                Create
+              </button>
             </div>
           </div>
         </div>
@@ -115,8 +144,8 @@
           </div>
         </div>
       </div>
-      <div class="table-students">
-        <table>
+      <div class="table-students-container">
+        <table id="studentsTable">
           <tr>
             <th>
               <input type="checkbox" />
@@ -140,20 +169,20 @@
               <span class="status-user online"></span>
             </td>
             <td>
-              <div class="btn-action">
-                <button
-                  type="button"
-                  onclick="openModalWindow('modal-edit-student')"
-                >
-                  <i class="fa-solid fa-pencil"></i>
-                </button>
-                <button
-                  type="button"
-                  onclick="openModalWindow('modal-delete-student')"
-                >
-                  <i class="fa-solid fa-xmark"></i>
-                </button>
-              </div>
+              <button
+                class="btn-action btn-success"
+                type="button"
+                onclick="openModalWindow('modal-edit-student')"
+              >
+                <i class="fa-solid fa-pencil"></i>
+              </button>
+              <button
+                class="btn-action btn-danger"
+                type="button"
+                onclick="openModalWindow('modal-delete-student')"
+              >
+                <i class="fa-solid fa-xmark"></i>
+              </button>
             </td>
           </tr>
           <tr>
@@ -168,20 +197,20 @@
               <span class="status-user offline"></span>
             </td>
             <td>
-              <div class="btn-action">
-                <button
-                  type="button"
-                  onclick="openModalWindow('modal-edit-student')"
-                >
-                  <i class="fa-solid fa-pencil"></i>
-                </button>
-                <button
-                  type="button"
-                  onclick="openModalWindow('modal-delete-student')"
-                >
-                  <i class="fa-solid fa-xmark"></i>
-                </button>
-              </div>
+              <button
+                class="btn-action btn-success"
+                type="button"
+                onclick="openModalWindow('modal-edit-student')"
+              >
+                <i class="fa-solid fa-pencil"></i>
+              </button>
+              <button
+                class="btn-action btn-danger"
+                type="button"
+                onclick="openModalWindow('modal-delete-student')"
+              >
+                <i class="fa-solid fa-xmark"></i>
+              </button>
             </td>
           </tr>
         </table>

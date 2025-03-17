@@ -12,7 +12,7 @@ h1 {
   margin-bottom: 20px;
 }
 
-.table-students {
+.table-students-container {
   width: 100%;
   margin: auto;
   margin-top: 15px;
@@ -50,17 +50,17 @@ tr:hover {
   text-align: right;
 }
 
-.btn-success button:hover {
+.btn-success:hover {
   background-color: #27ae60;
   color: white;
 }
 
-.btn-danger button:hover {
+.btn-danger:hover {
   background-color: #dc3545;
   color: white;
 }
 
-.btn-action button {
+.btn-action {
   padding: 8px 12px;
   border: none;
   border-radius: 5px;
