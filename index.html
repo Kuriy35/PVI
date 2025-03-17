@@ -15,10 +15,10 @@
     ></script>
     <title>CMS</title>
   </head>
-  <body onload="loadPage('./pages/students.html')">
+  <body>
     <div>
       <header class="header">
-        <div class="logo" onclick="loadPage('./pages/students.html')">CMS</div>
+        <div id="logo">CMS</div>
         <div class="header-right">
           <div class="dropdown">
             <div id="bellContainer">
@@ -62,11 +62,11 @@
         </div>
       </header>
       <div class="mainpage">
-        <nav id="bellEvent" class="navbar">
-          <ul>
-            <li onclick="loadPage('./pages/dashboard.html')">Dashboard</li>
-            <li onclick="loadPage('./pages/students.html')">Students</li>
-            <li onclick="loadPage('./pages/tasks.html')">Tasks</li>
+        <nav id="navbar" class="navbar">
+          <ul id="navbar-list">
+            <li id="navbar-element-dashboard">Dashboard</li>
+            <li id="navbar-element-students">Students</li>
+            <li id="navbar-element-tasks">Tasks</li>
           </ul>
         </nav>
 

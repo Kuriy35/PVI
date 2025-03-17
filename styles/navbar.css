@@ -18,6 +18,11 @@
   border-radius: 3px;
 }
 
-.navbar ul li:hover {
-  background-color: #495057;
+.navbar li:hover {
+  background-color: #868e96;
+}
+
+.navbar-active {
+  font-size: 18px;
+  background-color: #2f3338;
 }

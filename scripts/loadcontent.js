@@ -19,7 +19,7 @@ document
     indicator.innerText = "0";
   });
 
-document.getElementById("bellEvent").addEventListener("dblclick", function () {
+document.getElementById("navbar").addEventListener("dblclick", function () {
   const bell = document.getElementById("notificationBell");
   const indicator = document.getElementById("notificationIndicator");
 
@@ -37,4 +37,88 @@ document.getElementById("bellEvent").addEventListener("dblclick", function () {
   }
 
   indicator.style.display = "flex";
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  loadPage("/pages/students.html");
+
+  const studentsPageLink = document.getElementById("navbar-element-students");
+  studentsPageLink.classList.add("navbar-active");
+});
+
+document.getElementById("logo").addEventListener("click", function () {
+  loadPage("./pages/students.html");
+});
+
+document
+  .getElementById("navbar-element-dashboard")
+  .addEventListener("click", function () {
+    loadPage("./pages/dashboard.html");
+  });
+
+document
+  .getElementById("navbar-element-students")
+  .addEventListener("click", function () {
+    loadPage("./pages/students.html");
+  });
+
+document
+  .getElementById("navbar-element-tasks")
+  .addEventListener("click", function () {
+    loadPage("./pages/tasks.html");
+  });
+
+document
+  .getElementById("navbar-element-dashboard")
+  .addEventListener("click", function () {
+    loadPage("/pages/dashboard.html");
+
+    debugger;
+    const navigationMenu = document.getElementById("navbar-list");
+    for (let i = 0; i < navigationMenu.children.length; ++i) {
+      navigationMenu.children[i].classList.remove("navbar-active");
+    }
+
+    this.classList.add("navbar-active");
+  });
+
+document
+  .getElementById("navbar-element-students")
+  .addEventListener("click", function () {
+    loadPage("/pages/students.html");
+
+    debugger;
+    const navigationMenu = document.getElementById("navbar-list");
+    for (let i = 0; i < navigationMenu.children.length; ++i) {
+      navigationMenu.children[i].classList.remove("navbar-active");
+    }
+
+    this.classList.add("navbar-active");
+  });
+
+document
+  .getElementById("navbar-element-tasks")
+  .addEventListener("click", function () {
+    loadPage("/pages/tasks.html");
+
+    debugger;
+    const navigationMenu = document.getElementById("navbar-list");
+    for (let i = 0; i < navigationMenu.children.length; ++i) {
+      navigationMenu.children[i].classList.remove("navbar-active");
+    }
+
+    this.classList.add("navbar-active");
+  });
+
+document.getElementById("logo").addEventListener("click", function () {
+  loadPage("/pages/students.html");
+
+  debugger;
+  const navigationMenu = document.getElementById("navbar-list");
+  for (let i = 0; i < navigationMenu.children.length; ++i) {
+    navigationMenu.children[i].classList.remove("navbar-active");
+  }
+
+  const studentsPageLink = document.getElementById("navbar-element-students");
+  studentsPageLink.classList.add("navbar-active");
 });
