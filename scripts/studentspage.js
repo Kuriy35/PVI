@@ -8,7 +8,7 @@ const student = {
 
 const keys = Object.keys(student);
 
-let modalHeader;
+let modalHeader, warningTextMsg;
 let errorMsgs, inputFields;
 let selectAllCheckbox,
   rowCheckboxes,
@@ -22,9 +22,15 @@ function refreshEventListeners() {
   const closeModalWindowBtnX = document.getElementById("btn-modal-input-x");
   const closeModalWindowBtnOk = document.getElementById("btn-modal-input-ok");
   const submitStudentDataBtn = document.getElementById("submitStudentDataBtn");
+  const confirmDeleteStudentBtn = document.getElementById(
+    "confirmDeleteStudent"
+  );
   modalHeader = document.getElementById("modalStudentsDataHeader");
+  warningTextMsg = document.getElementById("warningTextMsg");
+
   inputFields = document.querySelectorAll(".input-student-data-field");
   errorMsgs = document.querySelectorAll(".validation-error-output");
+
   selectAllCheckbox = document.getElementById("selectAllCheckbox");
   rowCheckboxes = document.getElementsByClassName("checkbox-row-element");
   editButtons = document.getElementsByClassName("btn-edit");
@@ -94,6 +100,26 @@ function refreshEventListeners() {
     });
   }
 
+  if (confirmDeleteStudentBtn) {
+    confirmDeleteStudentBtn.addEventListener("click", function () {
+      debugger;
+      const modal = document.getElementById("modal-delete-student");
+      const row = document.getElementById(modal.dataset.rowId);
+
+      if (row) {
+        let checkbox = row.querySelector("input[type='checkbox']");
+        let index = checkedBoxes.indexOf(checkbox);
+        if (index !== -1) {
+          checkedBoxes.splice(index, 1);
+        }
+        row.remove();
+      }
+
+      debugger;
+      closeModalWindow("modal-delete-student");
+    });
+  }
+
   if (selectAllCheckbox) {
     selectAllCheckbox.addEventListener("click", function () {
       Array.from(rowCheckboxes).forEach(
@@ -105,6 +131,7 @@ function refreshEventListeners() {
       }
       updateOptionsStatus();
     });
+    selectAllCheckbox.click();
   }
 
   if (rowCheckboxes) {
@@ -140,6 +167,13 @@ function refreshEventListeners() {
     if (deleteButtons) {
       Array.from(deleteButtons).forEach((btn) =>
         btn.addEventListener("click", function () {
+          let row = btn.closest("tr");
+          let name = row.querySelector("td:nth-child(3)");
+          warningTextMsg.innerText = `Are you sure you want to delete user ${name.textContent.trim()}?`;
+
+          const modal = document.getElementById("modal-delete-student");
+          modal.dataset.rowId = row.id;
+
           openModalWindow("modal-delete-student");
         })
       );
@@ -288,6 +322,9 @@ function addStudent(student) {
   deleteBtn.type = "button";
   deleteBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
   deleteBtn.addEventListener("click", function () {
+    let row = deleteBtn.closest("tr");
+    let name = row.querySelector("td:nth-child(3)");
+    warningTextMsg.innerText = `Are you sure you want to delete user ${name.textContent.trim()}?`;
     openModalWindow("modal-delete-student");
   });
 

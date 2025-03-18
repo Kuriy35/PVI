@@ -114,8 +114,9 @@
       <div id="modal-delete-student" class="modal-student-remove">
         <div class="modal-content-student-remove">
           <div class="modal-student-remove-header">
-            <div class="btn-action btn-danger btn-position-right">
+            <div class="btn-position-right">
               <button
+                class="btn-action btn-neutral"
                 type="button"
                 onclick="closeModalWindow('modal-delete-student')"
               >
@@ -126,21 +127,24 @@
           </div>
           <hr />
           <div class="modal-student-remove-body">
-            <div>Are you sure you want tot delete user ...?</div>
+            <div id="warningTextMsg">Some warning text</div>
           </div>
           <hr />
           <div class="modal-student-remove-footer">
-            <div class="btn-action btn-danger">
-              <button
-                type="button"
-                onclick="closeModalWindow('modal-delete-student')"
-              >
-                Cancel
-              </button>
-            </div>
-            <div class="btn-action btn-success">
-              <button type="button">Create</button>
-            </div>
+            <button
+              class="btn-action btn-neutral"
+              type="button"
+              onclick="closeModalWindow('modal-delete-student')"
+            >
+              Cancel
+            </button>
+            <button
+              id="confirmDeleteStudent"
+              class="btn-action btn-danger"
+              type="button"
+            >
+              OK
+            </button>
           </div>
         </div>
       </div>
