@@ -2,8 +2,7 @@
   background-color: #3e4e55;
   color: #ecf0f1;
   padding-top: 25px;
-  flex-grow: 0.15;
-  max-width: 250px;
+  width: 175px;
 }
 
 .navbar ul {

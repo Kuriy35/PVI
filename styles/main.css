@@ -14,8 +14,7 @@
   }
 
   .navbar {
-    max-width: 100%;
-    flex-grow: 0;
+    min-width: 100%;
     padding-top: 0px;
   }
 

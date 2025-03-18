@@ -60,6 +60,11 @@ tr:hover {
   color: white;
 }
 
+.btn-neutral:hover {
+  background-color: #c9bdbe;
+  color: white;
+}
+
 .btn-action {
   padding: 8px 12px;
   border: none;

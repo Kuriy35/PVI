@@ -19,7 +19,7 @@
             <div class="btn-position-right">
               <button
                 class="btn-action btn-danger"
-                id="btn-modal-close-x"
+                id="btn-modal-input-x"
                 type="button"
               >
                 <i class="fa-solid fa-xmark"></i>
@@ -40,7 +40,7 @@
                 <option value="PZ-23">PZ-23</option>
               </select>
               <span id="groupSelectErrorMsg" class="validation-error-output"
-                >123</span
+                >Error</span
               >
             </div>
             <div class="input-student-data-container">
@@ -51,7 +51,7 @@
                 class="input-student-data-field"
               />
               <span id="firstNameErrorMsg" class="validation-error-output"
-                >123</span
+                >Error</span
               >
             </div>
             <div class="input-student-data-container">
@@ -62,7 +62,7 @@
                 class="input-student-data-field"
               />
               <span id="lastNameErrorMsg" class="validation-error-output"
-                >123</span
+                >Error</span
               >
             </div>
             <div class="input-student-data-container">
@@ -73,7 +73,7 @@
                 <option value="Female">Female</option>
               </select>
               <span id="genderErrorMsg" class="validation-error-output"
-                >123</span
+                >Error</span
               >
             </div>
             <div class="input-student-data-container">
@@ -84,7 +84,7 @@
                 class="input-student-data-field"
               />
               <span id="birthdayErrorMsg" class="validation-error-output"
-                >123</span
+                >Error</span
               >
             </div>
           </form>
@@ -92,11 +92,11 @@
           <div class="modal-student-data-footer">
             <div>
               <button
-                class="btn-action btn-danger"
-                id="btn-modal-close-ok"
+                class="btn-action btn-neutral"
+                id="btn-modal-input-ok"
                 type="button"
               >
-                Cancel
+                OK
               </button>
             </div>
             <div>
@@ -148,7 +148,7 @@
         <table id="studentsTable">
           <tr>
             <th>
-              <input type="checkbox" />
+              <input type="checkbox" id="selectAllCheckbox" />
             </th>
             <th>Group</th>
             <th>Name</th>
@@ -157,9 +157,13 @@
             <th>Status</th>
             <th>Options</th>
           </tr>
-          <tr>
+          <tr id="student0">
             <td>
-              <input type="checkbox" />
+              <input
+                id="checkboxStudent0"
+                type="checkbox"
+                class="checkbox-row-element"
+              />
             </td>
             <td>PZ-21</td>
             <td>Yurii Kozenko</td>
@@ -169,25 +173,21 @@
               <span class="status-user online"></span>
             </td>
             <td>
-              <button
-                class="btn-action btn-success"
-                type="button"
-                onclick="openModalWindow('modal-edit-student')"
-              >
+              <button class="btn-action btn-success btn-edit" type="button">
                 <i class="fa-solid fa-pencil"></i>
               </button>
-              <button
-                class="btn-action btn-danger"
-                type="button"
-                onclick="openModalWindow('modal-delete-student')"
-              >
+              <button class="btn-action btn-danger btn-delete" type="button">
                 <i class="fa-solid fa-xmark"></i>
               </button>
             </td>
           </tr>
-          <tr>
+          <tr id="student1">
             <td>
-              <input type="checkbox" />
+              <input
+                id="checkboxStudent1"
+                type="checkbox"
+                class="checkbox-row-element"
+              />
             </td>
             <td>PZ-21</td>
             <td>Armandik Friend</td>
@@ -197,18 +197,10 @@
               <span class="status-user offline"></span>
             </td>
             <td>
-              <button
-                class="btn-action btn-success"
-                type="button"
-                onclick="openModalWindow('modal-edit-student')"
-              >
+              <button class="btn-action btn-success btn-edit" type="button">
                 <i class="fa-solid fa-pencil"></i>
               </button>
-              <button
-                class="btn-action btn-danger"
-                type="button"
-                onclick="openModalWindow('modal-delete-student')"
-              >
+              <button class="btn-action btn-danger btn-delete" type="button">
                 <i class="fa-solid fa-xmark"></i>
               </button>
             </td>
