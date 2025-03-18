@@ -255,6 +255,7 @@ function isInputValid(student) {
 
 function addStudent(student) {
   const table = document.getElementById("studentsTable");
+  const tbody = table.querySelector("tbody");
   const newRow = document.createElement("tr");
 
   newRow.id = `student${studentId}`;
@@ -281,6 +282,7 @@ function addStudent(student) {
 
     updateOptionsStatus();
   });
+  selectAllCheckbox.checked = false;
   checkboxTd.appendChild(checkbox);
   newRow.appendChild(checkboxTd);
 
@@ -325,14 +327,17 @@ function addStudent(student) {
     let row = deleteBtn.closest("tr");
     let name = row.querySelector("td:nth-child(3)");
     warningTextMsg.innerText = `Are you sure you want to delete user ${name.textContent.trim()}?`;
+
+    const modal = document.getElementById("modal-delete-student");
+    modal.dataset.rowId = row.id;
+
     openModalWindow("modal-delete-student");
   });
 
   actionsTd.appendChild(editBtn);
   actionsTd.appendChild(deleteBtn);
   newRow.appendChild(actionsTd);
-
-  table.appendChild(newRow);
+  tbody.appendChild(newRow);
 
   studentId++;
 }

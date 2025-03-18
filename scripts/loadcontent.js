@@ -89,3 +89,11 @@ document.getElementById("logo").addEventListener("click", function () {
 
   studentsPageLink.classList.add("navbar-active");
 });
+
+document
+  .getElementById("notificationBell")
+  .addEventListener("click", function () {
+    for (let i = 0; i < navigationMenu.children.length; i++) {
+      navigationMenu.children[i].classList.remove("navbar-active");
+    }
+  });
