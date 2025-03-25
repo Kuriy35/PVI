@@ -64,3 +64,15 @@
 .dropdown-content-user-element:hover {
   background-color: #bfd6d2;
 }
+
+@media screen and (max-width: 375px) {
+  .dropdown-content-messages {
+    transform: translateX(-75%);
+    min-width: 200px;
+  }
+
+  .dropdown-content-user {
+    transform: translateX(-50%);
+    min-width: 120px;
+  }
+}

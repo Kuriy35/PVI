@@ -27,7 +27,6 @@ h1 {
 table {
   width: 100%;
   border-collapse: collapse;
-  empty-cells: show;
 }
 
 th,
@@ -39,7 +38,10 @@ td {
 
 th {
   background-color: #e8eaf6;
-  color: 333;
+}
+
+#selectAllCheckboxCell {
+  background-color: #e8eaf6;
 }
 
 tr:hover {
@@ -78,6 +80,10 @@ tr:hover {
   font-size: 20px;
 }
 
+#deleteSelectedBtn {
+  display: none;
+}
+
 #header-students-page {
   font-family: Arial;
   font-size: 28px;
@@ -107,7 +113,7 @@ tr:hover {
 .menu-pagination-element {
   background-color: white;
   border: 1px solid #007bff;
-  color: #3498db;
+  color: #256c9b;
   text-decoration: none;
   padding: 5px 10px;
   margin: 2px;
@@ -118,4 +124,8 @@ tr:hover {
 .menu-pagination-element:hover {
   background-color: #2980b9;
   color: white;
+}
+
+.current-page {
+  background-color: #16ffff;
 }

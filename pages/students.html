@@ -9,6 +9,13 @@
     <div>
       <h1 class="page-header">Students</h1>
       <div class="btn-position-right">
+        <button
+          class="btn-action btn-danger"
+          id="deleteSelectedBtn"
+          type="button"
+        >
+          Delete Selected
+        </button>
         <button class="btn-action btn-success" id="btn-add" type="button">
           +
         </button>
@@ -20,6 +27,7 @@
               <button
                 class="btn-action btn-danger"
                 id="btn-modal-input-x"
+                aria-label="Close modal window"
                 type="button"
               >
                 <i class="fa-solid fa-xmark"></i>
@@ -117,8 +125,9 @@
             <div class="btn-position-right">
               <button
                 class="btn-action btn-neutral"
+                id="closeModalDeleteBtnX"
                 type="button"
-                onclick="closeModalWindow('modal-delete-student')"
+                aria-label="Close modal window"
               >
                 <i class="fa-solid fa-xmark"></i>
               </button>
@@ -133,8 +142,8 @@
           <div class="modal-student-remove-footer">
             <button
               class="btn-action btn-neutral"
+              id="closeModalDeleteBtnCancel"
               type="button"
-              onclick="closeModalWindow('modal-delete-student')"
             >
               Cancel
             </button>
@@ -151,9 +160,13 @@
       <div class="table-students-container">
         <table id="studentsTable">
           <tr>
-            <th>
-              <input type="checkbox" id="selectAllCheckbox" />
-            </th>
+            <td id="selectAllCheckboxCell">
+              <input
+                type="checkbox"
+                id="selectAllCheckbox"
+                aria-label="Select all items"
+              />
+            </td>
             <th>Group</th>
             <th>Name</th>
             <th>Gender</th>
@@ -167,6 +180,7 @@
                 id="checkboxStudent0"
                 type="checkbox"
                 class="checkbox-row-element"
+                aria-label="Select student Yurii Kozenko"
               />
             </td>
             <td>PZ-21</td>
@@ -177,10 +191,18 @@
               <span class="status-user online"></span>
             </td>
             <td>
-              <button class="btn-action btn-success btn-edit" type="button">
+              <button
+                class="btn-action btn-success btn-edit"
+                type="button"
+                aria-label="Edit student Yurii Kozenko"
+              >
                 <i class="fa-solid fa-pencil"></i>
               </button>
-              <button class="btn-action btn-danger btn-delete" type="button">
+              <button
+                class="btn-action btn-danger btn-delete"
+                type="button"
+                aria-label="Delete student Yurii Kozenko"
+              >
                 <i class="fa-solid fa-xmark"></i>
               </button>
             </td>
@@ -191,6 +213,7 @@
                 id="checkboxStudent1"
                 type="checkbox"
                 class="checkbox-row-element"
+                aria-label="Select student Armandik Friend"
               />
             </td>
             <td>PZ-21</td>
@@ -201,10 +224,18 @@
               <span class="status-user offline"></span>
             </td>
             <td>
-              <button class="btn-action btn-success btn-edit" type="button">
+              <button
+                class="btn-action btn-success btn-edit"
+                type="button"
+                aria-label="Edit student Armandik Friend"
+              >
                 <i class="fa-solid fa-pencil"></i>
               </button>
-              <button class="btn-action btn-danger btn-delete" type="button">
+              <button
+                class="btn-action btn-danger btn-delete"
+                type="button"
+                aria-label="Delete student Armandik Friend"
+              >
                 <i class="fa-solid fa-xmark"></i>
               </button>
             </td>
