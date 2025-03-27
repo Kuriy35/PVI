@@ -1,19 +1,38 @@
 const notificationIndicator = document.getElementById("notificationIndicator");
-const bell = document.getElementById("notificationBell");
+const bell = document.getElementById("bellContainer");
 const studentsPageLink = document.getElementById("navbar-element-students");
 const navigationMenu = document.getElementById("navbar-list");
+const logoCMS = document.getElementById("logo");
 
 function loadPage(page) {
   fetch(page)
     .then((response) => response.text())
     .then((html) => {
       document.querySelector(".content").innerHTML = html;
-      refreshEventListeners();
+      if (page.includes("students.html")) {
+        refreshEventListeners();
+      }
     });
+}
+
+function clearActiveNav() {
+  navigationMenu.querySelectorAll(".navbar-active").forEach((elem) => {
+    elem.classList.remove("navbar-active");
+  });
+}
+
+function enableKeyboardClick(element) {
+  element.addEventListener("keydown", function (event) {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      element.click();
+    }
+  });
 }
 
 bell.addEventListener("click", function () {
   loadPage("/pages/messages.html");
+  clearActiveNav();
 
   notificationIndicator.style.display = "none";
   notificationIndicator.style.fontSize = "12px";
@@ -47,53 +66,33 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document
-  .getElementById("navbar-element-dashboard")
-  .addEventListener("click", function () {
-    loadPage("/pages/dashboard.html");
+  .getElementById("navbar-list")
+  .addEventListener("click", function (event) {
+    const target = event.target.closest("li");
+    if (!target) return;
 
-    for (let i = 0; i < navigationMenu.children.length; ++i) {
-      navigationMenu.children[i].classList.remove("navbar-active");
-    }
+    clearActiveNav();
+    target.classList.add("navbar-active");
 
-    this.classList.add("navbar-active");
+    const pages = {
+      "navbar-element-dashboard": "/pages/dashboard.html",
+      "navbar-element-students": "/pages/students.html",
+      "navbar-element-tasks": "/pages/tasks.html",
+    };
+
+    const page = pages[target.id];
+    if (page) loadPage(page);
   });
 
-studentsPageLink.addEventListener("click", function () {
+logoCMS.addEventListener("click", function () {
   loadPage("/pages/students.html");
 
-  for (let i = 0; i < navigationMenu.children.length; ++i) {
-    navigationMenu.children[i].classList.remove("navbar-active");
-  }
-
-  this.classList.add("navbar-active");
-});
-
-document
-  .getElementById("navbar-element-tasks")
-  .addEventListener("click", function () {
-    loadPage("/pages/tasks.html");
-
-    for (let i = 0; i < navigationMenu.children.length; ++i) {
-      navigationMenu.children[i].classList.remove("navbar-active");
-    }
-
-    this.classList.add("navbar-active");
-  });
-
-document.getElementById("logo").addEventListener("click", function () {
-  loadPage("/pages/students.html");
-
-  for (let i = 0; i < navigationMenu.children.length; ++i) {
-    navigationMenu.children[i].classList.remove("navbar-active");
-  }
+  clearActiveNav();
 
   studentsPageLink.classList.add("navbar-active");
 });
 
-document
-  .getElementById("notificationBell")
-  .addEventListener("click", function () {
-    for (let i = 0; i < navigationMenu.children.length; i++) {
-      navigationMenu.children[i].classList.remove("navbar-active");
-    }
-  });
+document.querySelectorAll("#navbar-list li").forEach(enableKeyboardClick);
+
+enableKeyboardClick(logoCMS);
+enableKeyboardClick(bell);

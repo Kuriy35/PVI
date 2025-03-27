@@ -18,59 +18,59 @@
   <body>
     <div>
       <header class="header">
-        <div id="logo">CMS</div>
+        <div id="logo" tabindex="0">CMS</div>
         <div class="header-right">
           <div class="dropdown">
-            <div id="bellContainer">
-              <i id="notificationBell" class="fa-regular fa-bell"></i>
+            <div id="bellContainer" tabindex="0" aria-label="Notifications">
+              <i class="fa-regular fa-bell"></i>
               <span id="notificationIndicator" class="bell-indicator">0</span>
             </div>
-            <div class="dropdown-content-messages">
-              <div class="dropdown-content-messages-element">
+            <ul class="dropdown-content-messages">
+              <li class="dropdown-content-messages-element">
                 <div class="sender-profile">
                   <i class="fa-solid fa-circle-user sender-avatar"></i>
                   <div class="sender-name">Yurii Kozenko</div>
                 </div>
                 <div class="received-message-content">Some text</div>
-              </div>
-              <div class="dropdown-content-messages-element">
+              </li>
+              <li class="dropdown-content-messages-element">
                 <div class="sender-profile">
                   <i class="fa-solid fa-circle-user sender-avatar"></i>
                   <div class="sender-name">Yurii Kozenko</div>
                 </div>
                 <div class="received-message-content">Some text</div>
-              </div>
-              <div class="dropdown-content-messages-element">
+              </li>
+              <li class="dropdown-content-messages-element">
                 <div class="sender-profile">
                   <i class="fa-solid fa-circle-user sender-avatar"></i>
                   <div class="sender-name">Yurii Kozenko</div>
                 </div>
                 <div class="received-message-content">Some text</div>
-              </div>
-            </div>
+              </li>
+            </ul>
           </div>
           <div class="dropdown">
             <div class="user-profile-bar">
               <i class="fa-solid fa-circle-user"></i>
               <div id="logged-in-username">Yurii Kozenko</div>
             </div>
-            <div class="dropdown-content-user">
-              <div class="dropdown-content-user-element">Profile</div>
-              <div class="dropdown-content-user-element">Log Out</div>
-            </div>
+            <ul class="dropdown-content-user">
+              <li class="dropdown-content-user-element">Profile</li>
+              <li class="dropdown-content-user-element">Log Out</li>
+            </ul>
           </div>
         </div>
       </header>
       <div class="mainpage">
         <nav id="navbar" class="navbar">
-          <ul id="navbar-list">
-            <li id="navbar-element-dashboard">Dashboard</li>
-            <li id="navbar-element-students">Students</li>
-            <li id="navbar-element-tasks">Tasks</li>
+          <ul id="navbar-list" tabindex="0" aria-label="Navigation menu">
+            <li id="navbar-element-dashboard" tabindex="0">Dashboard</li>
+            <li id="navbar-element-students" tabindex="0">Students</li>
+            <li id="navbar-element-tasks" tabindex="0">Tasks</li>
           </ul>
         </nav>
 
-        <main class="content"></main>
+        <main class="content" role="main"></main>
       </div>
     </div>
 

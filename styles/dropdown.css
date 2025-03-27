@@ -3,6 +3,12 @@
   display: inline-block;
 }
 
+.dropdown ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
 .dropdown-content-messages {
   display: none;
   position: absolute;
