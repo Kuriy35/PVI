@@ -15,6 +15,13 @@ function loadPage(page) {
     });
 }
 
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker
+    .register("/lab_project/service-worker.js")
+    .then((reg) => console.log("Service Worker зареєстровано", reg))
+    .catch((err) => console.log("Помилка реєстрації SW", err));
+}
+
 function clearActiveNav() {
   navigationMenu.querySelectorAll(".navbar-active").forEach((elem) => {
     elem.classList.remove("navbar-active");
@@ -31,7 +38,7 @@ function enableKeyboardClick(element) {
 }
 
 bell.addEventListener("click", function () {
-  loadPage("/pages/messages.html");
+  loadPage("/lab_project/pages/messages.html");
   clearActiveNav();
 
   notificationIndicator.style.display = "none";
@@ -60,7 +67,7 @@ document.getElementById("navbar").addEventListener("dblclick", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-  loadPage("/pages/students.html");
+  loadPage("/lab_project/pages/students.html");
 
   studentsPageLink.classList.add("navbar-active");
 });
@@ -75,9 +82,9 @@ document
     target.classList.add("navbar-active");
 
     const pages = {
-      "navbar-element-dashboard": "/pages/dashboard.html",
-      "navbar-element-students": "/pages/students.html",
-      "navbar-element-tasks": "/pages/tasks.html",
+      "navbar-element-dashboard": "/lab_project/pages/dashboard.html",
+      "navbar-element-students": "/lab_project/pages/students.html",
+      "navbar-element-tasks": "/lab_project/pages/tasks.html",
     };
 
     const page = pages[target.id];
@@ -85,7 +92,7 @@ document
   });
 
 logoCMS.addEventListener("click", function () {
-  loadPage("/pages/students.html");
+  loadPage("/lab_project/pages/students.html");
 
   clearActiveNav();
 

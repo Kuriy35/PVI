@@ -18,7 +18,7 @@ let selectAllCheckbox,
   checkedBoxes = [],
   deleteSelectedBtn,
   studentRowsToDelete = [];
-let studentId = 2;
+let studentId = 3;
 
 function refreshEventListeners() {
   const addBtn = document.getElementById("btn-add");
