@@ -1,16 +1,16 @@
 const CACHE_NAME = "lab-project-cache-v1";
 const urlsToCache = [
   "/",
-  "/lab_project/index.html",
-  "/lab_project/pages/students.html",
-  "/lab_project/pages/dashboard.html",
-  "/lab_project/pages/messages.html",
-  "/lab_project/pages/tasks.html",
-  "/lab_project/styles/main.css",
-  "/lab_project/styles/navbar.css",
-  "/lab_project/styles/header.css",
-  "/lab_project/scripts/loadcontent.js",
-  "/lab_project/scripts/studentspage.js",
+  "./index.html",
+  "./pages/students.html",
+  "./pages/dashboard.html",
+  "./pages/messages.html",
+  "./pages/tasks.html",
+  "./styles/main.css",
+  "./styles/navbar.css",
+  "./styles/header.css",
+  "./scripts/loadcontent.js",
+  "./scripts/studentspage.js",
 ];
 
 self.addEventListener("install", (event) => {
