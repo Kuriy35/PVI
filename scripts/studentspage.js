@@ -20,6 +20,8 @@ let selectAllCheckbox,
   studentRowsToDelete = [];
 let studentId = 3;
 
+let validationMode = "js";
+
 function refreshEventListeners() {
   const addBtn = document.getElementById("btn-add");
   closeModalInputBtnX = document.getElementById("btn-modal-input-x");
@@ -259,6 +261,16 @@ function initializeEditForm(initializationRow) {
 
 function isInputValid(studentData) {
   let isValid = true;
+
+  if (validationMode === "html") {
+    const form = document.querySelector(".modal-student-data-body");
+    isValid = form.checkValidity();
+    if (!isValid) {
+      form.reportValidity();
+    }
+    return isValid;
+  }
+
   for (let i = 0; i < keys.length; i++) {
     let isValidCurrent = true;
     if (studentData[keys[i]] === "" || studentData[keys[i]] === null) {
@@ -266,18 +278,18 @@ function isInputValid(studentData) {
       errorMsgs[i].innerText = "This field cannot be empty";
     } else if (
       keys[i] === "firstName" &&
-      !studentData[keys[i]].match(/^[a-zA-Z\s-]+$/)
+      !studentData[keys[i]].match(/^[A-Z][a-zA-Z\s'\-]*$/)
     ) {
       isValidCurrent = false;
       errorMsgs[i].innerText =
-        "First name can only contain letters, spaces, and hyphens.";
+        "Must start with a capital letter and only contain letters, spaces, ' and -";
     } else if (
       keys[i] === "lastName" &&
-      !studentData[keys[i]].match(/^[a-zA-Z\s-]+$/)
+      !studentData[keys[i]].match(/^[A-Z][a-zA-Z\s'\-]*$/)
     ) {
       isValidCurrent = false;
       errorMsgs[i].innerText =
-        "Last name can only contain letters, spaces, and hyphens.";
+        "Must start with a capital letter and only contain letters, spaces, ' and -";
     } else if (keys[i] === "birthDate") {
       const dateNow = new Date();
       const selectedDate = new Date(studentData[keys[i]]);
@@ -296,8 +308,7 @@ function isInputValid(studentData) {
     }
   }
 
-  if (isValid) return true;
-  else return false;
+  return isValid;
 }
 
 function addStudent(studentData) {

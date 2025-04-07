@@ -43,10 +43,15 @@
             </h1>
           </div>
           <hr />
-          <form action="javascript:void(0);" class="modal-student-data-body">
+          <form id="studentForm" class="modal-student-data-body">
             <div class="input-student-data-container">
               <label for="input-group-select">Group</label>
-              <select id="input-group-select" class="input-student-data-field">
+              <select
+                id="input-group-select"
+                required
+                class="input-student-data-field"
+                title="Select group"
+              >
                 <option value="" disabled selected>Select Group</option>
                 <option value="PZ-21">PZ-21</option>
                 <option value="PZ-22">PZ-22</option>
@@ -61,7 +66,10 @@
               <input
                 type="text"
                 id="input-first-name"
+                required
+                pattern="^[A-Z][a-zA-Z\s'\-]*$"
                 class="input-student-data-field"
+                title="Must start with a capital letter and only contain letters, spaces, ' and -"
               />
               <span id="firstNameErrorMsg" class="validation-error-output"
                 >Error</span
@@ -72,7 +80,10 @@
               <input
                 type="text"
                 id="input-last-name"
+                required
+                pattern="^[A-Z][a-zA-Z\s'\-]*$"
                 class="input-student-data-field"
+                title="Must start with a capital letter and only contain letters, spaces, ' and -"
               />
               <span id="lastNameErrorMsg" class="validation-error-output"
                 >Error</span
@@ -80,7 +91,12 @@
             </div>
             <div class="input-student-data-container">
               <label for="input-gender-select">Gender</label>
-              <select id="input-gender-select" class="input-student-data-field">
+              <select
+                id="input-gender-select"
+                required
+                class="input-student-data-field"
+                title="Select gender"
+              >
                 <option value="" disabled selected>Select Gender</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -94,7 +110,9 @@
               <input
                 type="date"
                 id="input-birthday-date"
+                required
                 class="input-student-data-field"
+                title="Birthdate cannot be in the future"
               />
               <span id="birthdayErrorMsg" class="validation-error-output"
                 >Error</span
@@ -116,7 +134,7 @@
               <button
                 class="btn-action btn-success"
                 id="submitStudentDataBtn"
-                type="button"
+                type="submit"
               >
                 Create
               </button>

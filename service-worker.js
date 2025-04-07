@@ -37,14 +37,14 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("fetch", (event) => {
   event.respondWith(
-    fetch(event.request) // Спочатку пробуємо взяти з мережі
+    fetch(event.request)
       .then((response) => {
         return caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, response.clone()); // Оновлюємо кеш
+          cache.put(event.request, response.clone());
           return response;
         });
       })
-      .catch(() => caches.match(event.request)) // Якщо немає інтернету – беремо кеш
+      .catch(() => caches.match(event.request))
   );
 });
 

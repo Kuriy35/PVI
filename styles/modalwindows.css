@@ -44,7 +44,7 @@
   position: relative;
   justify-content: space-between;
   align-items: center;
-  margin: 15px;
+  margin: 17px;
   width: 90%;
   gap: 5px;
   max-width: 300px;
@@ -115,5 +115,21 @@
 @media screen and (max-width: 425px) {
   .input-student-data-field {
     max-width: 70%;
+  }
+
+  .validation-error-output {
+    transform: translate(-5%, 110%);
+    min-width: 200px;
+  }
+}
+
+@media screen and (max-width: 320px) {
+  .input-student-data-field {
+    max-width: 70%;
+  }
+
+  .validation-error-output {
+    transform: translate(-17%, 110%);
+    min-width: 200px;
   }
 }
