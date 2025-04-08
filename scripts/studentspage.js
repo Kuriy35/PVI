@@ -1,12 +1,13 @@
-const studentData = {
+const studentDataWithID = {
   group: "",
   firstName: "",
   lastName: "",
   gender: "",
   birthDate: "",
+  id: "",
 };
 
-const keys = Object.keys(studentData);
+const keys = ["group", "firstName", "lastName", "gender", "birthDate"];
 
 let closeModalInputBtnX, closeModalDeleteBtnX;
 let modalHeader, warningTextMsg;
@@ -66,15 +67,15 @@ function refreshEventListeners() {
 
   if (closeModalInputBtnOk) {
     closeModalInputBtnOk.addEventListener("click", function () {
-      readInputFields(studentData, keys, inputFields);
-      if (isInputValid(studentData)) {
+      readInputFields(studentDataWithID, keys, inputFields);
+      if (isInputValid(studentDataWithID)) {
         if (submitStudentDataBtn.innerText === "Confirm") {
           const modal = document.getElementById("modal-input-student");
-          editStudent(studentData, modal.dataset.rowId);
+          editStudent(studentDataWithID, modal.dataset.rowId);
         } else {
-          addStudent(studentData);
+          addStudent(studentDataWithID);
         }
-        console.log(JSON.stringify(studentData));
+        console.log(JSON.stringify(studentDataWithID));
       }
       resetInputForm();
       closeModalWindow("modal-input-student");
@@ -84,15 +85,15 @@ function refreshEventListeners() {
 
   if (submitStudentDataBtn) {
     submitStudentDataBtn.addEventListener("click", function () {
-      readInputFields(studentData, keys, inputFields);
-      if (isInputValid(studentData)) {
+      readInputFields(studentDataWithID, keys, inputFields);
+      if (isInputValid(studentDataWithID)) {
         if (submitStudentDataBtn.textContent === "Confirm") {
           const modal = document.getElementById("modal-input-student");
-          editStudent(studentData, modal.dataset.rowId);
+          editStudent(studentDataWithID, modal.dataset.rowId);
         } else {
-          addStudent(studentData);
+          addStudent(studentDataWithID);
         }
-        console.log(JSON.stringify(studentData));
+        console.log(JSON.stringify(studentDataWithID));
         resetInputForm();
         closeModalWindow("modal-input-student");
         addBtn.focus();
@@ -230,15 +231,20 @@ function resetInputForm() {
 
 function initializeEditForm(initializationRow) {
   {
-    studentData["group"] = initializationRow
+    const checkboxTd = initializationRow.querySelector("td:nth-child(1)");
+    const checkbox = checkboxTd.children[0];
+    const studentId = checkbox.id.replace("checkboxStudent", "student");
+    studentDataWithID["id"] = studentId;
+
+    studentDataWithID["group"] = initializationRow
       .querySelector("td:nth-child(2)")
       .textContent.trim();
     let fullName =
       initializationRow.querySelector("td:nth-child(3)").textContent;
-    [studentData["firstName"], studentData["lastName"]] = fullName
+    [studentDataWithID["firstName"], studentDataWithID["lastName"]] = fullName
       .trim()
       .split(" ");
-    studentData["gender"] =
+    studentDataWithID["gender"] =
       initializationRow.querySelector("td:nth-child(4)").textContent.trim() ===
       "M"
         ? "Male"
@@ -251,9 +257,10 @@ function initializeEditForm(initializationRow) {
       .querySelector("td:nth-child(5)")
       .textContent.trim();
     let [day, month, year] = birthDateText.split(".");
-    studentData["birthDate"] = `${year}-${month}-${day}`;
+    studentDataWithID["birthDate"] = `${year}-${month}-${day}`;
+
     for (let i = 0; i < keys.length; i++) {
-      inputFields[i].value = studentData[keys[i]];
+      inputFields[i].value = studentDataWithID[keys[i]];
       inputFields[i].style.color = "black";
     }
   }
@@ -317,6 +324,7 @@ function addStudent(studentData) {
   const newRow = document.createElement("tr");
 
   newRow.id = `student${studentId}`;
+  studentData.id = newRow.id;
 
   const checkboxTd = document.createElement("td");
   const checkbox = document.createElement("input");
