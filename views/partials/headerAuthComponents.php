@@ -1,26 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="./styles/header.css" />
-    <link rel="stylesheet" href="./styles/navbar.css" />
-    <link rel="stylesheet" href="./styles/studentspage.css" />
-    <link rel="stylesheet" href="./styles/main.css" />
-    <link rel="stylesheet" href="./styles/dropdown.css" />
-    <link rel="stylesheet" href="./styles/modalwindows.css" />
-    <link rel="manifest" href="./manifest.json" />
-    <script
-      src="https://kit.fontawesome.com/12f39570aa.js"
-      crossorigin="anonymous"
-    ></script>
-    <title>CMS</title>
-  </head>
-  <body>
-    <div>
-      <header class="header">
-        <div id="logo" tabindex="0">CMS</div>
-        <div class="header-right">
           <div class="dropdown">
             <div id="bellContainer" tabindex="0" aria-label="Notifications">
               <i class="fa-regular fa-bell"></i>
@@ -53,29 +30,10 @@
           <div class="dropdown">
             <div class="user-profile-bar">
               <i class="fa-solid fa-circle-user"></i>
-              <div id="logged-in-username">Yurii Kozenko</div>
+              <div id="logged-in-username"><?= $authUsername?></div>
             </div>
             <ul class="dropdown-content-user">
               <li class="dropdown-content-user-element">Profile</li>
-              <li class="dropdown-content-user-element">Log Out</li>
+              <li class="dropdown-content-user-element" id="logoutButton">Log Out</li>
             </ul>
           </div>
-        </div>
-      </header>
-      <div class="mainpage">
-        <nav id="navbar" class="navbar">
-          <ul id="navbar-list" tabindex="0" aria-label="Navigation menu">
-            <li id="navbar-element-dashboard" tabindex="0">Dashboard</li>
-            <li id="navbar-element-students" tabindex="0">Students</li>
-            <li id="navbar-element-tasks" tabindex="0">Tasks</li>
-          </ul>
-        </nav>
-
-        <main class="content" role="main"></main>
-      </div>
-    </div>
-
-    <script src="./scripts/loadcontent.js"></script>
-    <script src="./scripts/studentspage.js"></script>
-  </body>
-</html>
