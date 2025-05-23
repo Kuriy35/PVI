@@ -1,3 +1,5 @@
+import * as chatService from "./chat-service.js";
+
 const notificationIndicator = document.getElementById("notificationIndicator");
 const bell = document.getElementById("bellContainer");
 const studentsPageLink = document.getElementById("navbar-element-students");
@@ -7,9 +9,13 @@ const navbar = document.getElementById("navbar");
 const navbarList = document.getElementById("navbar-list");
 
 function loadPage(page) {
-  const timestamp = new Date().getTime();
+  // if (!window.isAuth) {
+  //   page = "students";
+  // }
 
-  fetch(`index.php?page=${page}&_=${timestamp}`, {
+  // фіксанути, щоб коли я в URL вказую не студентс і я не авторизований, то кидає на студентс
+
+  return fetch(`index.php?page=${page}`, {
     cache: "no-store",
     headers: {
       "X-Requested-With": "XMLHttpRequest",
@@ -25,9 +31,11 @@ function loadPage(page) {
       if (page === "students") {
         let tablePageNumber = 1;
         loadStudentsPage(tablePageNumber, tablePageSize);
+      } else if (page === "messages") {
+        loadMessagesPage();
       }
-    })
-    .catch((error) => console.error("Error loading page:", error));
+      return html;
+    });
 }
 
 function loadStudentsPage(tablePageNumber = 1, tablePageSize = 8) {
@@ -52,6 +60,59 @@ function loadStudentsPage(tablePageNumber = 1, tablePageSize = 8) {
       }
     })
     .catch((error) => console.error("Error loading students:", error));
+}
+
+function loadMessagesPage() {
+  loadUserChats();
+  chatService.refreshEventListeners();
+}
+
+function loadUserChats() {
+  if (!window.authUserId) return;
+
+  chatService
+    .getCurrentUserChats(window.authUserId)
+    .then((data) => renderChatList(data))
+    .catch((err) => console.error("Failed to load chats", err));
+}
+
+function renderChatList(chats) {
+  const chatListContainer = document.querySelector(".chat-list");
+  chatListContainer.innerHTML = "";
+
+  if (chats.length === 0) {
+    chatListContainer.innerHTML = "<p>У вас ще немає чатів</p>";
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+
+  chats.forEach((chat) => {
+    fragment.appendChild(renderChatItem(chat));
+  });
+
+  chatListContainer.appendChild(fragment);
+
+  chatListContainer.querySelectorAll(".chat-list-item").forEach((chatItem) => {
+    chatItem.addEventListener("click", () => {
+      chatService.selectChat(chatItem);
+    });
+  });
+}
+
+function renderChatItem(chatData) {
+  const template = document.getElementById("chatListItemTemplate");
+  const clone = template.content.cloneNode(true);
+
+  const chatListItem = clone.querySelector(".chat-list-item");
+  const chatNameItem = clone.querySelector(".chat-name-item");
+  const chatPreview = clone.querySelector(".chat-preview");
+
+  chatListItem.setAttribute("data-id", chatData._id);
+  chatNameItem.textContent = chatData.name;
+  // chatPreview.textContent =
+
+  return clone;
 }
 
 function renderStudentsTable(students) {
@@ -162,8 +223,16 @@ function enableKeyboardClick(element) {
 
 if (bell) {
   bell.addEventListener("click", function () {
-    loadPage("messages");
+    if (!window.isAuth) {
+      showLoginModal();
+      return;
+    }
+
     clearActiveNav();
+
+    loadPage("messages").catch((error) =>
+      console.error("Error loading page:", error)
+    );
 
     notificationIndicator.style.display = "none";
     notificationIndicator.style.fontSize = "12px";
@@ -194,15 +263,31 @@ if (navbar && bell) {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-  const mainContent = document.querySelector("main.content");
   const currentUrlParams = new URLSearchParams(window.location.search);
   const currentPage = currentUrlParams.get("page");
 
-  if (currentPage === "students") {
-    let tablePageNumber = 1;
-    loadStudentsPage(tablePageNumber, tablePageSize);
-  }
+  setAuthUserData()
+    .then(() => {
+      if (currentPage === "students") {
+        let tablePageNumber = 1;
+        loadStudentsPage(tablePageNumber, tablePageSize);
+      } else if (currentPage === "messages") {
+        loadMessagesPage();
+      }
+    })
+    .catch((error) => console.error("Failed to load requested page:", error));
 });
+
+function setAuthUserData() {
+  return fetch("index.php?action=getAuthUserData")
+    .then((response) => response.json())
+    .then((data) => {
+      window.authUserId = data["id"];
+      window.authUserFirstName = data["first_name"];
+      window.authUserLastName = data["last_name"];
+    })
+    .catch((error) => console.error("Failed to set auth user data:", error));
+}
 
 if (navbarList) {
   navbarList.addEventListener("click", function (event) {
@@ -222,13 +307,15 @@ if (navbarList) {
 
     if (!window.isAuth) {
       showLoginModal();
-    } else loadPage(page);
+    } else loadPage(page).catch((error) => console.error("Error loading page:", error));
   });
 }
 
 if (logoCMS) {
   logoCMS.addEventListener("click", function () {
-    loadPage("students");
+    loadPage("students").catch((error) =>
+      console.error("Error loading page:", error)
+    );
 
     clearActiveNav();
 
@@ -240,19 +327,3 @@ document.querySelectorAll("#navbar-list li").forEach(enableKeyboardClick);
 
 enableKeyboardClick(logoCMS);
 enableKeyboardClick(bell);
-
-function showToastMessage(message, type) {
-  const toast = document.createElement("div");
-  toast.classList.add(
-    "toast",
-    type === "error" ? "toast-error" : "toast-success"
-  );
-  toast.textContent = message;
-
-  const toastContainer = document.getElementById("toast-container");
-  toastContainer.appendChild(toast);
-
-  setTimeout(() => {
-    toast.remove();
-  }, 4000);
-}

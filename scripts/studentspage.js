@@ -47,7 +47,6 @@ function refreshEventListenersAuth(totalStudentCount = null) {
   if (logoutBtn) {
     if (!logoutBtn.hasAttribute("logout-click-listener-added")) {
       logoutBtn.addEventListener("click", function () {
-        debugger;
         fetch("index.php?controller=auth&action=logout")
           .then((response) => response.json())
           .then((data) => {
@@ -222,7 +221,9 @@ function refreshEventListenersAuth(totalStudentCount = null) {
           .then((data) => {
             idsToDeleteArray = [];
             if (data.status) {
-              loadPage("students");
+              loadPage("students").catch((error) =>
+                console.error("Error loading page:", error)
+              );
             } else {
               showToastMessage(data.errors[0], "error");
             }
@@ -669,4 +670,20 @@ function updateCurrentPageUI(pageNumber) {
       link.classList.add("current-page");
     }
   });
+}
+
+function showToastMessage(message, type) {
+  const toast = document.createElement("div");
+  toast.classList.add(
+    "toast",
+    type === "error" ? "toast-error" : "toast-success"
+  );
+  toast.textContent = message;
+
+  const toastContainer = document.getElementById("toast-container");
+  toastContainer.appendChild(toast);
+
+  setTimeout(() => {
+    toast.remove();
+  }, 4000);
 }

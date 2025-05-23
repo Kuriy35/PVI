@@ -7,6 +7,16 @@ class StudentsController {
         return $students;
     }
 
+    public function getAllStudentsGeneralData() {
+        $students = Students::getAllStudentsGeneralData();
+        return $students;
+    }
+
+    public function getFullNameById($idArray) {
+        $students = Students::getFullNameById($idArray);
+        return $students;
+    }
+
     public function getPaginatedStudentsPage($pageNumber, $pageSize)
     {
         $students = Students::getStudentsPaginated($pageNumber, $pageSize);

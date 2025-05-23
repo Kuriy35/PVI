@@ -10,11 +10,15 @@ $controllerName = getRequestParam('controller');
 $action = getRequestParam('action');
 
 // Обробка API-запитів
-if ($controllerName && $action) {
-    require_once "./controllers/{$controllerName}controller.php";
+if ($action) {
+    if ($controllerName) {
+        require_once "./controllers/{$controllerName}controller.php";
+    }
+    
     handleApiRequest($controllerName, $action);
     exit;
 }
+
 
 // Обробка відображення сторінок
 $page = getRequestParam('page') ?? 'students';
@@ -33,6 +37,12 @@ function getRequestParam($name)
 function getRequestData()
 {
     $method = $_SERVER['REQUEST_METHOD'];
+    $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+
+    if ($contentType === 'application/json') {
+        $input = json_decode(file_get_contents("php://input"), true);
+        return is_array($input) ? $input : [];
+    }
 
     switch ($method) {
         case 'GET':
@@ -48,80 +58,104 @@ function getRequestData()
     }
 }
 
+
 function handleApiRequest($controllerName, $action)
 {
     $requestData = getRequestData();
 
-    switch ($controllerName) {
-        case 'students':
-            $controller = new StudentsController();
-            header('Content-Type: application/json');
-
-            switch ($action) {
-                case 'getAll':
-                    echo json_encode($controller->getAllStudents());
-                    break;
-
-                case 'getPaginated':
-                    $page = isset($requestData['tablePageNumber']) ? (int)$requestData['tablePageNumber'] : 1;
-                    $pageSize = isset($requestData['tablePageSize']) ? (int)$requestData['tablePageSize'] : 7;
-                    echo json_encode($controller->getPaginatedStudentsPage($page, $pageSize));
-                    break;
-
-                case 'addStudent':
-                    $result = $controller->addStudent($requestData);
-
-                    if (isAjaxRequest()) {
-                        echo json_encode($result);
-                        break;
-                    }
-                    else {
-
-                        header("Location: index.php?page=students");
-                        exit;
-                    }
-
-                case 'editStudent':
-                    $result = $controller->editStudent($requestData);
-
-                    if (isAjaxRequest()) {
-                        echo json_encode($result);
-                        break;
-                    }
-                    else {
-                        header("Location: index.php?page=students");
-                        exit;
-                    }
-
-                case 'deleteStudents':
-                    echo json_encode($controller->deleteStudents($requestData));
-                    break;
-
-                default:
-                    http_response_code(404);
-                    echo json_encode(['error' => 'Unknown action']);
-            }
-            break;
-
-        case 'auth':
-            $controller = new AuthController();
-
-            if ($action === 'login') {
-                $controller->login($requestData);
-            } else if ($action === 'logout') {
-                $controller->logout();
-            } else {
+    if (!$controllerName)
+    {
+        switch($action)
+        {
+            case 'getAuthUserData':
+                header('Content-Type: application/json');
+                echo json_encode($_SESSION['user']);
+                break;
+            default:
                 http_response_code(404);
                 echo json_encode(['error' => 'Unknown action']);
-            }
-            break;
+        }
+    }
+    else 
+    {
+        switch ($controllerName) {
+            case 'students':
+                $controller = new StudentsController();
+                header('Content-Type: application/json');
 
-        default:
-            http_response_code(404);
-            echo json_encode(['error' => 'Unknown controller']);
+                switch ($action) {
+                    case 'getAll':
+                        echo json_encode($controller->getAllStudents());
+                        break;
+
+                    case 'getAllGeneralData':
+                        echo json_encode($controller->getAllStudentsGeneralData());
+                        break;
+
+                    case 'getFullNameById':
+                        $idArray = isset($requestData['userIdsToGet']) ? $requestData['userIdsToGet'] : [];
+                        echo json_encode($controller->getFullNameById($idArray));
+                        break;
+
+                    case 'getPaginated':
+                        $page = isset($requestData['tablePageNumber']) ? (int)$requestData['tablePageNumber'] : 1;
+                        $pageSize = isset($requestData['tablePageSize']) ? (int)$requestData['tablePageSize'] : 7;
+                        echo json_encode($controller->getPaginatedStudentsPage($page, $pageSize));
+                        break;
+
+                    case 'addStudent':
+                        $result = $controller->addStudent($requestData);
+
+                        if (isAjaxRequest()) {
+                            echo json_encode($result);
+                            break;
+                        }
+                        else {
+                            header("Location: index.php?page=students");
+                            exit;
+                        }
+
+                    case 'editStudent':
+                        $result = $controller->editStudent($requestData);
+
+                        if (isAjaxRequest()) {
+                            echo json_encode($result);
+                            break;
+                        }
+                        else {
+                            header("Location: index.php?page=students");
+                            exit;
+                        }
+
+                    case 'deleteStudents':
+                        echo json_encode($controller->deleteStudents($requestData));
+                        break;
+
+                    default:
+                        http_response_code(404);
+                        echo json_encode(['error' => 'Unknown action']);
+                }
+                break;
+
+            case 'auth':
+                $controller = new AuthController();
+
+                if ($action === 'login') {
+                    $controller->login($requestData);
+                } else if ($action === 'logout') {
+                    $controller->logout();
+                } else {
+                    http_response_code(404);
+                    echo json_encode(['error' => 'Unknown action']);
+                }
+                break;
+
+            default:
+                http_response_code(404);
+                echo json_encode(['error' => 'Unknown controller']);
+        }
     }
 }
-
 
 function handlePageRequest($page)
 {
@@ -152,7 +186,14 @@ function handlePageRequest($page)
             : renderPartial('./views/partials/studentsPageGuestComponents.php', $variables);
     }
 
-    $content = renderPartial("./views/{$page}.php", $variables);
+    if ($page === 'messages')
+    {
+        ob_start();
+        include './views/messages.html';
+        $content = ob_get_clean();
+    }
+    else 
+        $content = renderPartial("./views/{$page}.php", $variables);
 
     if (isAjaxRequest()) {
         echo $content;

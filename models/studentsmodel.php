@@ -18,6 +18,47 @@ class Students {
         }
     }
 
+    public static function getAllStudentsGeneralData() {
+        global $conn;
+        $sql = "SELECT id, first_name, last_name FROM students";
+        $result = $conn->query($sql);
+
+        if ($result->num_rows > 0) {
+            $students = [];
+            while($row = $result->fetch_assoc()) {
+                $students[] = $row;
+            }
+            return $students;
+        } else {
+            return [];
+        }
+    }
+
+    public static function getFullNameById($idArray) {
+        global $conn;
+
+        $idArray = array_filter($idArray, 'is_numeric');
+
+        if (empty($idArray)) {
+            return [];
+        }
+
+        $ids = implode(',', array_map('intval', $idArray));
+
+        $sql = "SELECT first_name, last_name FROM students WHERE id IN ($ids)";
+        $result = $conn->query($sql);
+
+        if ($result->num_rows > 0) {
+            $students = [];
+            while($row = $result->fetch_assoc()) {
+                $students[] = $row;
+            }
+            return $students;
+        } else {
+            return [];
+        }
+    }
+
     public static function getStudentsPaginated($page = 1, $pageSize = 10)
     {
         global $conn;

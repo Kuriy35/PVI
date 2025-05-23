@@ -80,7 +80,8 @@
     </div>
 
     <script>window.isAuth = <?= isAuthorized() ? "true" : "false" ?></script>
+    <!-- <script>window.authUserId = <?= isAuthorized() ? $_SESSION['user']['id'] : null ?></script> -->
     <script src="./scripts/studentspage.js"></script>
-    <script src="./scripts/loadcontent.js"></script>
+    <script type="module" src="./scripts/loadcontent.js"></script>
   </body>
 </html>
