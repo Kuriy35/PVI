@@ -45,7 +45,7 @@ class Students {
 
         $ids = implode(',', array_map('intval', $idArray));
 
-        $sql = "SELECT first_name, last_name FROM students WHERE id IN ($ids)";
+        $sql = "SELECT id, first_name, last_name FROM students WHERE id IN ($ids)";
         $result = $conn->query($sql);
 
         if ($result->num_rows > 0) {

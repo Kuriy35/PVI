@@ -5,7 +5,6 @@ if (empty($_GET) && empty($_POST) && $_SERVER['REQUEST_METHOD'] === 'GET') {
     header('Location: index.php?page=students');
     exit;
 }
-
 $controllerName = getRequestParam('controller');
 $action = getRequestParam('action');
 
@@ -69,7 +68,11 @@ function handleApiRequest($controllerName, $action)
         {
             case 'getAuthUserData':
                 header('Content-Type: application/json');
-                echo json_encode($_SESSION['user']);
+                $response = null;
+
+                if (isAuthorized()) $response = $_SESSION['user'];
+                
+                echo json_encode($response);
                 break;
             default:
                 http_response_code(404);
@@ -168,6 +171,12 @@ function handlePageRequest($page)
     if ($page === '404') {
         echo "<h2>404 - Page not found</h2>";
         return;
+    }
+
+    if(!isAuthorized()  && $page !== 'students')
+    {
+        header('Location: index.php?page=students');
+        exit;
     }
 
     $variables = [];

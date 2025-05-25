@@ -1,6 +1,7 @@
 .dropdown {
   position: relative;
   display: inline-block;
+  right: 0;
 }
 
 .dropdown ul {
@@ -12,42 +13,65 @@
 .dropdown-content-messages {
   display: none;
   position: absolute;
-  transform: translateX(-30%);
-  background-color: #ffffff;
-  min-width: 230px;
-  box-shadow: 0px 5px 12px 3px rgba(0, 0, 0, 0.3);
+  right: 0;
+  top: 100%;
+  background-color: white;
+  min-width: 280px;
+  max-height: 400px;
+  overflow-y: auto;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  z-index: 2;
+  margin-top: 5px;
+  border: 1px solid #e0e0e0;
 }
 
 .dropdown:hover .dropdown-content-messages {
   display: block;
 }
 .dropdown-content-messages-element {
-  color: black;
-  padding: 8px 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.2s;
 }
 
 .dropdown-content-messages-element:hover {
-  background-color: #bfd6d2;
+  background-color: #f5f5f5;
 }
 
 .sender-profile {
   display: flex;
-  align-items: flex-end;
-  gap: 7px;
+  align-items: center;
+  margin-bottom: 4px;
 }
 
-.sender-avatar {
-  font-size: 24px;
+.chat-name-preview {
+  font-weight: 500;
+  color: #2c3e50;
+  margin-left: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
 }
 
-.sender-name {
-  font-size: 16px;
+.received-message-preview {
+  font-size: 13px;
+  color: #7f8c8d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-left: 40px;
 }
 
-.received-message-content {
-  margin-top: 5px;
+.dropdown-content-messages-element .avatar-circle {
+  width: 32px;
+  height: 32px;
   font-size: 14px;
-  color: gray;
+  margin-right: 8px;
 }
 
 .dropdown-content-user {
@@ -63,7 +87,6 @@
   display: block;
 }
 .dropdown-content-user-element {
-  color: black;
   padding: 12px 16px;
 }
 
@@ -71,14 +94,24 @@
   background-color: #bfd6d2;
 }
 
+.message-time-menu {
+  font-size: 11px;
+  color: #7f8c8d;
+  margin-left: auto;
+  padding-left: 10px;
+}
+
 @media screen and (max-width: 375px) {
   .dropdown-content-messages {
-    transform: translateX(-75%);
     min-width: 200px;
   }
 
   .dropdown-content-user {
     transform: translateX(-50%);
     min-width: 120px;
+  }
+
+  .chat-name-preview {
+    max-width: 150px;
   }
 }

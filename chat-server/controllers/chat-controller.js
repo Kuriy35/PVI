@@ -16,6 +16,9 @@ const createChat = async (req, res) => {
 
     const chat = new ChatRoom({ name, description, users });
     await chat.save();
+
+    req.io.emit("addedToChat", chat);
+
     res.status(201).json(chat);
   } catch (err) {
     res.status(500).json({ error: `Failed to create room! (${err})` });
@@ -37,9 +40,8 @@ const getChats = async (req, res) => {
 const getChatById = async (req, res) => {
   try {
     const { chatId } = req.params;
-    const chatObjectId = new mongoose.Types.ObjectId(chatId);
 
-    const chat = await ChatRoom.find({ _id: chatObjectId });
+    const chat = await ChatRoom.findById(chatId);
     res.status(200).json(chat);
   } catch (err) {
     res.status(500).json({ error: "Failed to get chat!" });

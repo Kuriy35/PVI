@@ -1,7 +1,18 @@
+const socket = io("http://localhost:3000");
+
+socket.on("connectionConfirmed", (data) => {
+  console.log("✅ Connection confirmed:", data);
+});
+
+socket.on("disconnect", () => {
+  console.log("❌ Disconnected from server");
+});
+
 let selectedUsers = [];
-let currentChatType = "group";
+let lastMessagesByChat = {};
+
 let chatNameInputValue, chatDescriptionInputValue;
-const chatState = {
+const currentChat = {
   id: "",
   name: "",
   description: "",
@@ -22,6 +33,43 @@ function closeCreateChatModal() {
   document.getElementById("chatDescription").value = "";
 }
 
+export function generateAvatarData(name) {
+  const initials = name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase()
+    .substring(0, 2);
+
+  const colors = [
+    "#F44336",
+    "#E91E63",
+    "#9C27B0",
+    "#673AB7",
+    "#3F51B5",
+    "#2196F3",
+    "#03A9F4",
+    "#00BCD4",
+    "#009688",
+    "#4CAF50",
+    "#8BC34A",
+    "#CDDC39",
+    "#FFC107",
+    "#FF9800",
+    "#FF5722",
+  ];
+
+  const hash = name
+    .split("")
+    .reduce((acc, char) => char.charCodeAt(0) + acc, 0);
+  const colorIndex = hash % colors.length;
+
+  return {
+    initials,
+    color: colors[colorIndex],
+  };
+}
+
 function proceedToAddUsers() {
   const chatName = document.getElementById("chatName").value;
   if (!chatName.trim()) {
@@ -36,7 +84,7 @@ function openAddUsersModal(isNewChat = false) {
   if (isNewChat) {
     getAvailableUsersList();
   } else {
-    getAvailableUsersList(chatState.participants);
+    getAvailableUsersList(currentChat.participants);
     closeModal("chatInfoModal");
   }
   selectedUsers = [];
@@ -96,9 +144,14 @@ function renderAvailableToAddUser(userData) {
   const template = document.getElementById("userToAddTemplate");
   const clone = template.content.cloneNode(true);
 
-  clone.querySelector(
-    ".user-name"
-  ).textContent = `${userData.first_name} ${userData.last_name}`;
+  const fullName = `${userData.first_name} ${userData.last_name}`;
+  const avatarData = generateAvatarData(fullName);
+
+  const avatarElement = clone.querySelector(".avatar-circle");
+  avatarElement.textContent = avatarData.initials;
+  avatarElement.style.backgroundColor = avatarData.color;
+
+  clone.querySelector(".user-name").textContent = fullName;
   clone.querySelector(".user-item").setAttribute("data-id", userData.id);
 
   return clone;
@@ -166,7 +219,7 @@ export function selectChat(chatElement) {
 
   clearChat();
 
-  getMessagesForChat(chatElement.getAttribute("data-id"))
+  getMessagesForChat(chatElement.id)
     .then((data) => {
       const fragment = document.createDocumentFragment();
       data.forEach((message) => {
@@ -174,6 +227,7 @@ export function selectChat(chatElement) {
       });
 
       chatMessagesContainer.appendChild(fragment);
+      scrollToBottom(chatMessagesContainer);
     })
     .catch((err) =>
       console.error("Failed to get messages for this chat:", err)
@@ -185,31 +239,62 @@ export function selectChat(chatElement) {
 
   chatElement.classList.add("active");
 
-  // currentChatType = type;
-  chatState.id = chatElement.getAttribute("data-id");
-  chatState.name = chatElement.querySelector(".chat-name-item").textContent;
+  currentChat.id = chatElement.id;
+  currentChat.name = chatElement.querySelector(".chat-name-item").textContent;
 
-  document.getElementById("current-chat-name").textContent = chatState.name;
+  const avatarData = generateAvatarData(currentChat.name);
 
-  // if (type === "group") {
-  //   const participantCount = Math.floor(Math.random() * 8) + 3;
-  //   document.getElementById(
-  //     "current-chat-status"
-  //   ).textContent = `${participantCount} учасників`;
-  //   document.getElementById("current-chat-status").style.cursor = "pointer";
-  // } else {
-  //   const statuses = [
-  //     "У мережі",
-  //     "Був 5 хвилин тому",
-  //     "Була вчора",
-  //     "Був вчора",
-  //   ];
-  //   const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-  //   document.getElementById("current-chat-status").textContent = randomStatus;
-  //   document.getElementById("current-chat-status").style.cursor = "default";
-  // }
-  document.getElementById("current-chat-status").textContent = "Online";
+  const avatarElement = document.querySelector(".chat-header .avatar-circle");
+  avatarElement.textContent = avatarData.initials;
+  avatarElement.style.backgroundColor = avatarData.color;
+
+  document.getElementById("current-chat-name").textContent = currentChat.name;
+
+  document.getElementById("current-chat-status").textContent = "members";
   document.getElementById("current-chat-status").style.cursor = "pointer";
+
+  document.querySelector(".empty-chat-header").style.display = "none";
+  document.querySelector(".chat-header").style.display = "flex";
+  document.querySelector(".chat-main-container").style.display = "flex";
+  document.querySelector(".chat-input-container").style.display = "flex";
+
+  const unreadMessagesCount = parseInt(
+    chatElement.querySelector(".chat-notifications-number").textContent
+  );
+  const currentUnreadMessagesCount = parseInt(
+    document.getElementById("notificationIndicator").textContent
+  );
+
+  if (unreadMessagesCount <= 0 || isNaN(unreadMessagesCount)) return;
+
+  const updatedUnreadMessagesCount =
+    currentUnreadMessagesCount - unreadMessagesCount;
+
+  if (markChatAsViewed(currentChat.id, window.authUserId)) {
+    setNotificationsCount(updatedUnreadMessagesCount);
+    showNotifications();
+
+    const notifsNumber = chatElement.querySelector(
+      ".chat-notifications-number"
+    );
+    notifsNumber.style.display = "none";
+    notifsNumber.textContent = "0";
+    chatElement.classList.remove("unread");
+  }
+}
+
+async function markChatAsViewed(chatId, userId) {
+  try {
+    const socketResponse = await new Promise((resolve) => {
+      socket.emit("messagesViewed", chatId, userId, (response) => {
+        resolve(response);
+      });
+    });
+
+    return socketResponse.success;
+  } catch (error) {
+    console.error("markChatViewed failed:", error);
+  }
 }
 
 function clearChat() {
@@ -224,20 +309,25 @@ function renderMessage(messageData) {
   const minutes = date.getMinutes().toString().padStart(2, "0");
   const formattedTime = `${hours}:${minutes}`;
 
-  const templateType =
-    window.authUserId == messageData.authorId
-      ? "messageOutgoingTemplate"
-      : "messageIncomingTemplate";
+  const isOutgoing =
+    window.authUserId.toString() === messageData.authorId.toString();
+  const templateType = isOutgoing
+    ? "messageOutgoingTemplate"
+    : "messageIncomingTemplate";
   const template = document.getElementById(templateType);
   const clone = template.content.cloneNode(true);
+
+  const avatarData = generateAvatarData(messageData.authorName);
+  const avatarElement = clone.querySelector(".avatar-circle");
+  avatarElement.textContent = avatarData.initials;
+  avatarElement.style.backgroundColor = avatarData.color;
 
   clone.querySelector(".message-text").textContent = messageData.text;
   clone.querySelector(".message-time").textContent = formattedTime;
 
-  const messageAuthorClassType =
-    window.authUserId == messageData.authorId
-      ? ".message-author-outgoing"
-      : ".message-author-incoming";
+  const messageAuthorClassType = isOutgoing
+    ? ".message-author-outgoing"
+    : ".message-author-incoming";
 
   const authorField = clone.querySelector(messageAuthorClassType);
   authorField.setAttribute("data-id", messageData._id);
@@ -252,78 +342,123 @@ function sendMessage() {
   ).value;
   document.querySelector(".chat-input-container .message-input").value = "";
 
-  fetch("http://localhost:3000/api/messages/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      chatId: chatState.id,
-      authorId: window.authUserId,
-      authorName: `${window.authUserFirstName} ${window.authUserLastName}`,
-      text: message,
-    }),
-  }).catch((error) => console.error("Failed to send message:", error));
+  const messageData = JSON.stringify({
+    chatId: currentChat.id,
+    authorId: window.authUserId,
+    authorName: `${window.authUserFirstName} ${window.authUserLastName}`,
+    text: message,
+  });
+
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(new Error("Message sending timeout"));
+    }, 10000);
+
+    socket.emit("sendMessage", messageData, (response) => {
+      clearTimeout(timeout);
+
+      if (response.success) {
+        console.log("✅ Message sent successfully");
+        console.log(
+          `Delivered to ${response.deliveredTo}/${response.totalUsers} users`
+        );
+        resolve(response.message);
+      } else {
+        console.error("❌ Failed to send message:", response.error);
+        reject(new Error(response.error));
+      }
+    });
+  });
 }
 
 async function openChatInfoModal() {
   try {
+    const socketResponse = await new Promise((resolve) => {
+      socket.emit("getChatInfo", currentChat.id, (response) => {
+        resolve(response);
+      });
+    });
+
+    if (!socketResponse.success) {
+      console.error("Failed to get chat info message:", socketResponse.error);
+      return;
+    }
+
+    currentChat.participants = socketResponse.chat.users;
+    currentChat.description = socketResponse.chat.description;
+    const participantsWithStatus = socketResponse.participantsWithStatus;
+
     const response = await fetch(
-      `http://localhost:3000/api/chats/${chatState.id}`
-    );
-    if (!response.ok) throw new Error("Chat not found");
-    const data = await response.json();
-
-    chatState.participants = data[0].users;
-    chatState.description = data[0].description;
-
-    // Показати назву та опис
-    document.getElementById("chatInfoTitle").textContent = chatState.name;
-    document.getElementById("chatInfoDescription").textContent =
-      chatState.description;
-    document.getElementById("chatInfoModal").style.display = "block";
-
-    getAvailableUsersList(chatState.participants);
-
-    const fullNamesResponse = await fetch(
       "index.php?controller=students&action=getFullNameById",
       {
         method: "POST",
         headers: {
           "Content-type": "application/json",
         },
-        body: JSON.stringify({ userIdsToGet: chatState.participants }),
+        body: JSON.stringify({ userIdsToGet: currentChat.participants }),
       }
     );
 
-    if (!fullNamesResponse.ok) throw new Error("Failed to get full names");
+    if (!response.ok) throw new Error("Failed to get full names");
 
-    const fullNames = await fullNamesResponse.json();
-    renderParticipantsList(fullNames);
+    const responseData = await response.json();
+    renderParticipantsList(responseData, participantsWithStatus);
+
+    document.getElementById("chatInfoTitle").textContent = currentChat.name;
+    document.getElementById("chatInfoDescription").textContent =
+      currentChat.description;
+    document.getElementById("chatInfoModal").style.display = "block";
   } catch (error) {
     console.error("openChatInfoModal failed:", error);
   }
 }
 
-function renderParticipantsList(participants) {
+function renderParticipantsList(participantsData, participantsWithStatus) {
   const participantsList = document.getElementById("participantsList");
   participantsList.innerHTML = "";
   const fragment = document.createDocumentFragment();
 
-  participants.forEach((participant) => {
-    fragment.appendChild(renderParticipantElement(participant));
+  participantsData.forEach((participant) => {
+    fragment.appendChild(
+      renderParticipantElement(participant, participantsWithStatus)
+    );
   });
 
   participantsList.appendChild(fragment);
 }
 
-function renderParticipantElement(participant) {
+function renderParticipantElement(participant, participantsWithStatus) {
   const template = document.getElementById("participantTemplate");
   const clone = template.content.cloneNode(true);
 
-  clone.querySelector(
-    ".participant-name"
-  ).textContent = `${participant.first_name} ${participant.last_name}`;
+  const fullName = `${participant.first_name} ${participant.last_name}`;
+  const isCurrentUser =
+    participant.id.toString() === window.authUserId.toString();
+
+  const avatarData = generateAvatarData(fullName);
+  const avatarElement = clone.querySelector(".avatar-circle");
+  avatarElement.textContent = avatarData.initials;
+  avatarElement.style.backgroundColor = avatarData.color;
+
+  const nameElement = clone.querySelector(".participant-name");
+  nameElement.textContent = isCurrentUser ? `${fullName} (Ви)` : fullName;
+
+  if (isCurrentUser) {
+    nameElement.classList.add("current-user");
+    clone.querySelector(".participant").classList.add("current-user-container");
+  }
+
+  const participantStatus = participantsWithStatus.find(
+    (statusItem) => statusItem.userId.toString() === participant.id.toString()
+  );
+
+  const statusElement = clone.querySelector(".participant-status");
+  if (statusElement && participantStatus) {
+    statusElement.textContent = participantStatus.status;
+    statusElement.classList.add(
+      participantStatus.status === "Online" ? "status-online" : "status-offline"
+    );
+  }
 
   return clone;
 }
@@ -372,10 +507,22 @@ export function refreshEventListeners() {
   sendMessageBtn.addEventListener("click", sendMessage);
 }
 
-export function getCurrentUserChats(userId) {
-  return fetch(`http://localhost:3000/api/chats/user/${userId}`).then((res) =>
-    res.json()
-  );
+export async function getCurrentUserChats(userId) {
+  try {
+    const socketResponse = await new Promise((resolve) => {
+      socket.emit("getChatsList", userId, (response) => {
+        resolve(response);
+      });
+    });
+
+    if (!socketResponse.success) {
+      console.error("Failed to get chat info message:", socketResponse.error);
+      return;
+    }
+    return socketResponse.chats;
+  } catch (error) {
+    console.error("openChatInfoModal failed:", error);
+  }
 }
 
 function getMessagesForChat(chatId) {
@@ -383,3 +530,316 @@ function getMessagesForChat(chatId) {
     (res) => res.json()
   );
 }
+
+export function connectUser(userId) {
+  socket.emit("userConnected", userId);
+}
+
+export async function renderUserNotifications(userId, chatElements = null) {
+  const currentUrlParams = new URLSearchParams(window.location.search);
+  const currentPage = currentUrlParams.get("page");
+  const userNotifications = await getUserNotifications(userId);
+
+  setNotificationsCount(userNotifications.length);
+
+  const notificationsByChatId = new Map();
+  userNotifications.forEach((notif) => {
+    const chatId = notif.chat._id;
+    if (!notificationsByChatId.get(chatId)) {
+      notificationsByChatId.set(chatId, []);
+    }
+    notificationsByChatId.get(chatId).push(notif);
+  });
+
+  if (currentPage === "messages" && chatElements !== null) {
+    chatElements.forEach((chatElement) => {
+      const notifsArray = notificationsByChatId.get(chatElement.id);
+      const unreadCount = notifsArray ? notifsArray.length : 0;
+      updateChatListItemNotifications(chatElement, unreadCount);
+    });
+  }
+
+  const sortedChats = [...notificationsByChatId.entries()]
+    .sort((a, b) => {
+      const aLast = new Date(a[1][0].chat.lastActivityAt);
+      const bLast = new Date(b[1][0].chat.lastActivityAt);
+      return bLast - aLast;
+    })
+    .slice(0, 3);
+
+  sortedChats.forEach(([chatId, notifications]) => {
+    const latestNotif = notifications.sort(
+      (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+    )[0];
+
+    const chatName = latestNotif.chat.name;
+    updateLastMessagesMenu(latestNotif.chat.lastMessage, chatName, chatId);
+  });
+
+  showNotifications();
+}
+
+async function getUserNotifications(userId) {
+  try {
+    const socketResponse = await new Promise((resolve) => {
+      socket.emit("getUserNotifications", userId, (response) => {
+        resolve(response);
+      });
+    });
+
+    if (!socketResponse.success) {
+      console.error("Failed to get user notifications:", socketResponse.error);
+      return;
+    }
+    return socketResponse.notifications;
+  } catch (error) {
+    console.error("getUserNotifications failed:", error);
+  }
+}
+
+function updateChatListItemNotifications(chatElement, unreadCount) {
+  const notificationElement = chatElement.querySelector(
+    ".chat-notifications-number"
+  );
+
+  if (unreadCount > 0) {
+    notificationElement.textContent = unreadCount.toString();
+    chatElement.classList.add("unread");
+    notificationElement.style.display = "flex";
+  } else {
+    notificationElement.textContent = "";
+    chatElement.classList.remove("unread");
+    notificationElement.style.display = "none";
+  }
+}
+
+export function updateChatListItemTime(timeElement, time) {
+  timeElement.textContent = formatMessageTime(time);
+}
+
+function scrollToBottom(element, smoothScroll = false) {
+  element.scrollTo({
+    top: element.scrollHeight,
+    behavior: smoothScroll ? "smooth" : "auto",
+  });
+}
+
+export function shortenPreviewText(authorName, messageText, maxLength = 30) {
+  const fullText = `${authorName}: ${messageText}`;
+
+  if (fullText.length <= maxLength) {
+    return {
+      author: authorName + ":",
+      text: messageText,
+    };
+  }
+
+  const availableLength = maxLength - authorName.length - 2;
+  let shortenedText = messageText.substring(0, availableLength);
+
+  if (availableLength < messageText.length) {
+    shortenedText += "…";
+  }
+
+  return {
+    author: authorName + ":",
+    text: shortenedText,
+  };
+}
+
+function updateLastMessagesMenu(newMessage, chatName, chatId) {
+  const lastMessagesMenu = document.querySelector(".dropdown-content-messages");
+
+  lastMessagesByChat[chatId] = { newMessage, chatName, chatId };
+
+  const latestMessages = Object.values(lastMessagesByChat)
+    .sort(
+      (a, b) =>
+        new Date(b.newMessage.createdAt) - new Date(a.newMessage.createdAt)
+    )
+    .slice(0, 3);
+
+  lastMessagesMenu.innerHTML = "";
+
+  latestMessages.forEach((messageData) => {
+    const menuItem = renderLastMessagesMenuItem(
+      messageData.newMessage,
+      messageData.chatName,
+      messageData.chatId
+    );
+    lastMessagesMenu.appendChild(menuItem);
+  });
+
+  lastMessagesMenu
+    .querySelectorAll(".dropdown-content-messages-element")
+    .forEach((element) =>
+      element.addEventListener("click", () => {
+        chatId = element.getAttribute("data-chat-id");
+        window.location.href = `/CMS/index.php?page=messages&chat=${chatId}`;
+      })
+    );
+}
+
+function renderLastMessagesMenuItem(messageData, chatName, chatId) {
+  const template = document.getElementById("lastMessagesMenuItemTemplate");
+  const clone = template.content.cloneNode(true);
+
+  const avatarElement = clone.querySelector(".avatar-circle");
+  const { initials, color } = generateAvatarData(chatName);
+  avatarElement.textContent = initials;
+  avatarElement.style.backgroundColor = color;
+
+  clone.querySelector(".chat-name-preview").textContent = chatName;
+
+  const timeElement = clone.querySelector(".message-time-menu");
+  timeElement.textContent = formatMessageTime(messageData.createdAt);
+
+  const preview = clone.querySelector(".received-message-preview");
+  const authorSpan = document.createElement("span");
+  const { author, text } = shortenPreviewText(
+    messageData.authorName,
+    messageData.text
+  );
+
+  authorSpan.className = "message-author-preview";
+  authorSpan.textContent = author;
+
+  const textSpan = document.createElement("span");
+  textSpan.className = "message-text-preview";
+  textSpan.textContent = text;
+
+  preview.innerHTML = "";
+  preview.appendChild(authorSpan);
+  preview.appendChild(textSpan);
+
+  clone.querySelector("li").setAttribute("data-chat-id", chatId);
+
+  return clone;
+}
+
+export function formatMessageTime(time) {
+  const date = new Date(time);
+  const now = new Date();
+
+  if (isSameDay(date, now)) {
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  } else if (isSameYear(date, now)) {
+    return date.toLocaleDateString([], { month: "short", day: "numeric" });
+  } else {
+    return date.toLocaleDateString([], {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  }
+}
+
+function isSameDay(date1, date2) {
+  return (
+    date1.getDate() === date2.getDate() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getFullYear() === date2.getFullYear()
+  );
+}
+
+function isSameYear(date1, date2) {
+  return date1.getFullYear() === date2.getFullYear();
+}
+
+function setNotificationsCount(notifCount = 0) {
+  const notificationIndicator = document.getElementById(
+    "notificationIndicator"
+  );
+
+  notificationIndicator.textContent = notifCount;
+}
+
+function showNotifications(addNew = false) {
+  const bell = document.getElementById("bellContainer");
+  const notificationIndicator = document.getElementById(
+    "notificationIndicator"
+  );
+
+  let messagesCount = parseInt(notificationIndicator.textContent) || 0;
+
+  if (addNew) {
+    messagesCount++;
+  }
+
+  if (messagesCount <= 99) {
+    notificationIndicator.textContent = messagesCount;
+  } else {
+    notificationIndicator.textContent = "99+";
+    notificationIndicator.style.fontSize = "9px";
+  }
+
+  if (messagesCount > 0) {
+    notificationIndicator.style.display = "flex";
+    bell.classList.add("shake");
+    setTimeout(() => bell.classList.remove("shake"), 500);
+  } else notificationIndicator.style.display = "none";
+}
+
+socket.on("messageReceived", (response) => {
+  const currentUrlParams = new URLSearchParams(window.location.search);
+  const currentPage = currentUrlParams.get("page");
+
+  if (
+    currentPage === "messages" &&
+    response.message.chatId._id.toString() === currentChat.id.toString()
+  ) {
+    const chatMessagesContainer = document.querySelector(
+      ".chat-main-container"
+    );
+    chatMessagesContainer.appendChild(renderMessage(response.message));
+    scrollToBottom(chatMessagesContainer, true);
+    markChatAsViewed(currentChat.id, window.authUserId);
+
+    const chatElement = document.getElementById(
+      `${response.message.chatId._id}`
+    );
+    const timeElement = chatElement.querySelector(".chat-last-message-time");
+    updateChatListItemTime(timeElement, response.message.createdAt);
+  } else if (
+    response.message.authorId.toString() !== window.authUserId.toString()
+  ) {
+    updateLastMessagesMenu(
+      response.message,
+      response.message.chatId.name,
+      response.message.chatId._id
+    );
+
+    showNotifications(true);
+
+    if (currentPage === "messages") {
+      const chatElement = document.getElementById(
+        `${response.message.chatId._id}`
+      );
+      let unreadMessagesCount = parseInt(
+        chatElement.querySelector(".chat-notifications-number").textContent
+      );
+      unreadMessagesCount = isNaN(unreadMessagesCount)
+        ? 1
+        : unreadMessagesCount + 1;
+
+      const timeElement = chatElement.querySelector(".chat-last-message-time");
+      updateChatListItemTime(timeElement, response.message.createdAt);
+      updateChatListItemNotifications(chatElement, unreadMessagesCount);
+
+      const chatPreviewAuthor = chatElement.querySelector(".message-author");
+      const chatPreviewMessage = chatElement.querySelector(".message-text");
+
+      const preview = shortenPreviewText(
+        response.message.authorName,
+        response.message.text
+      );
+
+      chatPreviewAuthor.textContent = preview.author;
+      chatPreviewMessage.textContent = preview.text;
+    }
+  }
+});
+
+socket.on("newChat", (chatData) => {
+  renderChatItem(chatData);
+});

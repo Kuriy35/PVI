@@ -20,7 +20,6 @@ function refreshEventListeners(totalStudentCount = null) {
 }
 
 function refreshEventListenersAuth(totalStudentCount = null) {
-  const logoutBtn = document.getElementById("logoutButton");
   const addBtn = document.getElementById("btn-add");
   closeModalInputBtnX = document.getElementById("btn-modal-input-x");
   const closeModalInputBtnOk = document.getElementById("btn-modal-input-ok");
@@ -43,24 +42,6 @@ function refreshEventListenersAuth(totalStudentCount = null) {
   editButtons = document.getElementsByClassName("btn-edit");
   deleteButtons = document.getElementsByClassName("btn-delete");
   deleteSelectedBtn = document.getElementById("deleteSelectedBtn");
-
-  if (logoutBtn) {
-    if (!logoutBtn.hasAttribute("logout-click-listener-added")) {
-      logoutBtn.addEventListener("click", function () {
-        fetch("index.php?controller=auth&action=logout")
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.redirect) {
-              window.location.href = data.redirect;
-            } else if (data.error) {
-              console.error("Logout failed:", data.error);
-            }
-          })
-          .catch((error) => console.error("Failed to logout:", error));
-      });
-      logoutBtn.setAttribute("logout-click-listener-added", "true");
-    }
-  }
 
   if (addBtn) {
     if (!addBtn.hasAttribute("addStudent-click-listener-added")) {

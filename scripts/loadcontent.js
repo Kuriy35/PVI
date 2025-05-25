@@ -1,20 +1,12 @@
-import * as chatService from "./chat-service.js";
+import * as chatServiceModule from "./chat-service.js";
 
-const notificationIndicator = document.getElementById("notificationIndicator");
 const bell = document.getElementById("bellContainer");
 const studentsPageLink = document.getElementById("navbar-element-students");
-const navigationMenu = document.getElementById("navbar-list");
 const logoCMS = document.getElementById("logo");
-const navbar = document.getElementById("navbar");
 const navbarList = document.getElementById("navbar-list");
+const logoutBtn = document.getElementById("logoutButton");
 
 function loadPage(page) {
-  // if (!window.isAuth) {
-  //   page = "students";
-  // }
-
-  // фіксанути, щоб коли я в URL вказую не студентс і я не авторизований, то кидає на студентс
-
   return fetch(`index.php?page=${page}`, {
     cache: "no-store",
     headers: {
@@ -62,24 +54,25 @@ function loadStudentsPage(tablePageNumber = 1, tablePageSize = 8) {
     .catch((error) => console.error("Error loading students:", error));
 }
 
-function loadMessagesPage() {
-  loadUserChats();
-  chatService.refreshEventListeners();
+async function loadMessagesPage() {
+  await loadUserChats();
+  chatServiceModule.refreshEventListeners();
 }
 
 function loadUserChats() {
   if (!window.authUserId) return;
 
-  chatService
+  return chatServiceModule
     .getCurrentUserChats(window.authUserId)
-    .then((data) => renderChatList(data))
+    .then((data) => {
+      renderChatList(data);
+    })
     .catch((err) => console.error("Failed to load chats", err));
 }
 
 function renderChatList(chats) {
   const chatListContainer = document.querySelector(".chat-list");
   chatListContainer.innerHTML = "";
-
   if (chats.length === 0) {
     chatListContainer.innerHTML = "<p>У вас ще немає чатів</p>";
     return;
@@ -93,24 +86,49 @@ function renderChatList(chats) {
 
   chatListContainer.appendChild(fragment);
 
-  chatListContainer.querySelectorAll(".chat-list-item").forEach((chatItem) => {
+  const chatElements = chatListContainer.querySelectorAll(".chat-list-item");
+  chatServiceModule.renderUserNotifications(window.authUserId, chatElements);
+
+  chatElements.forEach((chatItem) => {
     chatItem.addEventListener("click", () => {
-      chatService.selectChat(chatItem);
+      chatServiceModule.selectChat(chatItem);
     });
   });
 }
 
-function renderChatItem(chatData) {
+function renderChatItem(chat) {
   const template = document.getElementById("chatListItemTemplate");
   const clone = template.content.cloneNode(true);
 
   const chatListItem = clone.querySelector(".chat-list-item");
-  const chatNameItem = clone.querySelector(".chat-name-item");
-  const chatPreview = clone.querySelector(".chat-preview");
+  chatListItem.id = chat._id;
 
-  chatListItem.setAttribute("data-id", chatData._id);
-  chatNameItem.textContent = chatData.name;
-  // chatPreview.textContent =
+  const avatarElement = clone.querySelector(".avatar-circle");
+  const { initials, color } = chatServiceModule.generateAvatarData(chat.name);
+  avatarElement.textContent = initials;
+  avatarElement.style.backgroundColor = color;
+
+  clone.querySelector(".chat-name-item").textContent = chat.name;
+
+  const chatPreviewElement = clone.querySelector(".chat-preview");
+  const chatPreviewAuthor = chatPreviewElement.querySelector(".message-author");
+  const chatPreviewMessage = chatPreviewElement.querySelector(".message-text");
+
+  if (chat.lastMessage) {
+    const preview = chatServiceModule.shortenPreviewText(
+      chat.lastMessage.authorName,
+      chat.lastMessage.text
+    );
+
+    chatPreviewAuthor.textContent = preview.author;
+    chatPreviewMessage.textContent = preview.text;
+  } else {
+    chatPreviewAuthor.textContent = "";
+    chatPreviewMessage.textContent = "Немає повідомлень";
+  }
+
+  const timeElement = clone.querySelector(".chat-last-message-time");
+  chatServiceModule.updateChatListItemTime(timeElement, chat.lastActivityAt);
 
   return clone;
 }
@@ -205,7 +223,7 @@ function renderStudentRow(student) {
 // }
 
 function clearActiveNav() {
-  navigationMenu.querySelectorAll(".navbar-active").forEach((elem) => {
+  navbarList.querySelectorAll(".navbar-active").forEach((elem) => {
     elem.classList.remove("navbar-active");
   });
 }
@@ -233,60 +251,70 @@ if (bell) {
     loadPage("messages").catch((error) =>
       console.error("Error loading page:", error)
     );
-
-    notificationIndicator.style.display = "none";
-    notificationIndicator.style.fontSize = "12px";
-    notificationIndicator.innerText = "0";
   });
 }
 
-if (navbar && bell) {
-  navbar.addEventListener("dblclick", function () {
-    bell.classList.add("shake");
-    setTimeout(() => bell.classList.remove("shake"), 500);
-
-    let messagesCount = parseInt(notificationIndicator.innerText);
-
-    if (messagesCount != null) {
-      messagesCount++;
-
-      if (messagesCount <= 9) {
-        notificationIndicator.innerText = messagesCount;
-      } else {
-        notificationIndicator.innerText = "9+";
-        notificationIndicator.style.fontSize = "10px";
-      }
-
-      notificationIndicator.style.display = "flex";
-    }
-  });
-}
-
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   const currentUrlParams = new URLSearchParams(window.location.search);
-  const currentPage = currentUrlParams.get("page");
+  let currentPage = currentUrlParams.get("page");
 
-  setAuthUserData()
-    .then(() => {
-      if (currentPage === "students") {
-        let tablePageNumber = 1;
-        loadStudentsPage(tablePageNumber, tablePageSize);
-      } else if (currentPage === "messages") {
-        loadMessagesPage();
-      }
-    })
-    .catch((error) => console.error("Failed to load requested page:", error));
+  await setAuthUserData();
+
+  if (currentPage === "students") {
+    let tablePageNumber = 1;
+    loadStudentsPage(tablePageNumber, tablePageSize);
+  } else if (currentPage === "messages") {
+    await loadMessagesPage();
+  }
+
+  await chatServiceModule.renderUserNotifications(window.authUserId);
+
+  if (currentPage === "messages") {
+    let activeChatId = currentUrlParams.get("chat");
+    const activeChatElement = document.getElementById(`${activeChatId}`);
+    if (activeChatElement) activeChatElement.click();
+  }
+
+  if (logoutBtn) {
+    if (!logoutBtn.hasAttribute("logout-click-listener-added")) {
+      logoutBtn.addEventListener("click", function () {
+        fetch("index.php?controller=auth&action=logout")
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.redirect) {
+              window.location.href = data.redirect;
+            } else if (data.error) {
+              console.error("Logout failed:", data.error);
+            }
+          })
+          .catch((error) => console.error("Failed to logout:", error));
+      });
+      logoutBtn.setAttribute("logout-click-listener-added", "true");
+    }
+  }
 });
 
-function setAuthUserData() {
-  return fetch("index.php?action=getAuthUserData")
-    .then((response) => response.json())
-    .then((data) => {
+async function setAuthUserData() {
+  try {
+    const response = await fetch("index.php?action=getAuthUserData");
+    const data = await response.json();
+
+    if (!data) {
+      window.authUserId = null;
+      window.authUserFirstName = null;
+      window.authUserLastName = null;
+    } else {
       window.authUserId = data["id"];
       window.authUserFirstName = data["first_name"];
       window.authUserLastName = data["last_name"];
-    })
-    .catch((error) => console.error("Failed to set auth user data:", error));
+    }
+
+    if (window.authUserId) {
+      chatServiceModule.connectUser(window.authUserId);
+    }
+  } catch (error) {
+    console.error("Failed to set auth user data:", error);
+  }
 }
 
 if (navbarList) {

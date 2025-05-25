@@ -72,13 +72,12 @@ body {
   position: absolute;
   top: 0;
   right: 0;
-  background: red;
+  background-color: #e74c3c;
   color: white;
-  font-size: 12px;
-  font-weight: bold;
+  border-radius: 50%;
   width: 18px;
   height: 18px;
-  border-radius: 50%;
+  font-size: 11px;
   display: none;
   align-items: center;
   justify-content: center;

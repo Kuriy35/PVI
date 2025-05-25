@@ -3,7 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="./views/styles/messagesStyle.css" />
     <title>Messages</title>
   </head>
   <body>
@@ -16,68 +15,31 @@
         </div>
         <template id="chatListItemTemplate">
           <div class="chat-list-item" data-id="" data-users-count="">
+            <div class="avatar-circle"></div>
             <div class="chat-info">
               <div class="chat-name-item"></div>
-              <div class="chat-preview"></div>
+              <div class="chat-preview">
+                <span class="message-author"></span>
+                <span class="message-text"></span>
+              </div>
+            </div>
+            <div class="chat-params">
+              <div class="chat-last-message-time"></div>
+              <div class="chat-notifications-number"></div>
             </div>
           </div>
         </template>
-        <div class="chat-list">
-          <!-- <div
-            class="chat-list-item active"
-            onclick="selectChat('private', 'Alice')"
-          >
-            <img src="" alt="Alice" class="chat-avatar" />
-            <div class="chat-info">
-              <div class="chat-name-item">Alice</div>
-              <div class="chat-preview">Привіт! Як справи?</div>
-            </div>
-          </div>
-          <div class="chat-list-item" onclick="selectChat('private', 'Bob')">
-            <img src="" alt="Bob" class="chat-avatar" />
-            <div class="chat-info">
-              <div class="chat-name-item">Bob</div>
-              <div class="chat-preview">Дякую за допомогу</div>
-            </div>
-          </div>
-          <div
-            class="chat-list-item"
-            onclick="selectChat('group', 'Група друзів')"
-          >
-            <img src="" alt="Group" class="chat-avatar" />
-            <div class="chat-info">
-              <div class="chat-name-item">Група друзів</div>
-              <div class="chat-preview">Коля: Йдемо кудись сьогодні?</div>
-            </div>
-          </div>
-          <div
-            class="chat-list-item"
-            onclick="selectChat('private', 'Charlie')"
-          >
-            <img src="" alt="Charlie" class="chat-avatar" />
-            <div class="chat-info">
-              <div class="chat-name-item">Charlie</div>
-              <div class="chat-preview">До зустрічі завтра</div>
-            </div>
-          </div>
-          <div
-            class="chat-list-item"
-            onclick="selectChat('group', 'Робочий чат')"
-          >
-            <img src="" alt="Work Group" class="chat-avatar" />
-            <div class="chat-info">
-              <div class="chat-name-item">Робочий чат</div>
-              <div class="chat-preview">Нарада завтра о 10:00</div>
-            </div>
-          </div> -->
-        </div>
+        <div class="chat-list"></div>
       </div>
       <div class="chat-wrap-container">
+        <div class="empty-chat-header">
+          <h2>Select a chat to start messaging</h2>
+        </div>
         <div class="chat-header">
-          <img src="" alt="Current Chat" class="chat-header-avatar" />
+          <div class="avatar-circle"></div>
           <div class="chat-header-info">
-            <div class="chat-name" id="current-chat-name">Коля течес</div>
-            <div class="chat-users-info" id="current-chat-status">У мережі</div>
+            <div class="chat-name" id="current-chat-name"></div>
+            <div class="chat-users-info" id="current-chat-status"></div>
           </div>
         </div>
         <template id="messageIncomingTemplate">
@@ -85,10 +47,13 @@
             class="message-author-wrapper message-author-incoming"
             data-id=""
           ></div>
-          <div class="message message-incoming">
-            <div class="message-content">
-              <div class="message-text"></div>
-              <div class="message-time"></div>
+          <div class="message-wrap-container">
+            <div class="avatar-circle"></div>
+            <div class="message message-incoming">
+              <div class="message-content">
+                <div class="message-text"></div>
+                <div class="message-time"></div>
+              </div>
             </div>
           </div>
         </template>
@@ -98,51 +63,17 @@
             class="message-author-wrapper message-author-outgoing"
             data-id=""
           ></div>
-          <div class="message message-outgoing">
-            <div class="message-content">
-              <div class="message-text"></div>
-              <div class="message-time"></div>
+          <div class="message-wrap-container">
+            <div class="avatar-circle"></div>
+            <div class="message message-outgoing">
+              <div class="message-content">
+                <div class="message-text"></div>
+                <div class="message-time"></div>
+              </div>
             </div>
           </div>
         </template>
-        <div class="chat-main-container">
-          <!-- <div class="message-author-incoming">Коля течес</div>
-          <div class="message message-incoming">
-            <img src="" alt="User" class="message-avatar" />
-            <div class="message-content">
-              <div>Шо ти тіп?</div>
-              <div class="message-time">10:30 AM</div>
-            </div>
-          </div>
-          <div class="message message-outgoing">
-            <img src="" alt="You" class="message-avatar" />
-            <div class="message-content">
-              <div>Чотко, ти шо?</div>
-              <div class="message-time">10:32 AM</div>
-            </div>
-          </div>
-          <div class="message message-incoming">
-            <img src="" alt="User" class="message-avatar" />
-            <div class="message-content">
-              <div>Та нормуль, йдем десь сьогодні?</div>
-              <div class="message-time">10:33 AM</div>
-            </div>
-          </div>
-          <div class="message message-outgoing">
-            <img src="" alt="You" class="message-avatar" />
-            <div class="message-content">
-              <div>Го, хто буде?</div>
-              <div class="message-time">10:35 AM</div>
-            </div>
-          </div>
-          <div class="message message-incoming">
-            <img src="" alt="User" class="message-avatar" />
-            <div class="message-content">
-              <div>Хз, можу чорному набрати, а ти набери віталі</div>
-              <div class="message-time">10:36 AM</div>
-            </div>
-          </div> -->
-        </div>
+        <div class="chat-main-container"></div>
         <div class="chat-input-container">
           <input
             type="text"
@@ -184,33 +115,12 @@
 
         <template id="userToAddTemplate">
           <div data-id="" class="user-item">
-            <img src="" alt="Alice" class="user-item-avatar" />
+            <div class="avatar-circle"></div>
             <div class="user-name"></div>
           </div>
         </template>
 
-        <div class="user-list" id="userList">
-          <!-- <div class="user-item" onclick="toggleUser(this, 'alice')">
-            <img src="" alt="Alice" class="user-item-avatar" />
-            <div>Alice Johnson</div>
-          </div>
-          <div class="user-item" onclick="toggleUser(this, 'bob')">
-            <img src="" alt="Bob" class="user-item-avatar" />
-            <div>Bob Smith</div>
-          </div>
-          <div class="user-item" onclick="toggleUser(this, 'charlie')">
-            <img src="" alt="Charlie" class="user-item-avatar" />
-            <div>Charlie Brown</div>
-          </div>
-          <div class="user-item" onclick="toggleUser(this, 'david')">
-            <img src="" alt="David" class="user-item-avatar" />
-            <div>David Wilson</div>
-          </div>
-          <div class="user-item" onclick="toggleUser(this, 'eve')">
-            <img src="" alt="Eve" class="user-item-avatar" />
-            <div>Eve Davis</div>
-          </div> -->
-        </div>
+        <div class="user-list" id="userList"></div>
 
         <button class="modal-btn">Створити чат</button>
       </div>
@@ -221,6 +131,7 @@
         <span class="close">&times;</span>
         <h2 id="chatInfoTitle">Інформація про чат</h2>
 
+        <h5 id="chatInfoTitle">Description:</h5>
         <div class="chat-description" id="chatInfoDescription">
           Це груповий чат для обговорення планів та координації зустрічей з
           друзями.
@@ -233,36 +144,14 @@
           </h3>
           <template id="participantTemplate">
             <div class="participant">
-              <!-- <img src="" alt="Коля" class="participant-avatar" /> -->
+              <div class="avatar-circle"></div>
               <div class="participant-info">
                 <div class="participant-name"></div>
-                <div class="participant-status">Online</div>
+                <div class="participant-status"></div>
               </div>
             </div>
           </template>
-          <div id="participantsList">
-            <!-- <div class="participant">
-              <img src="" alt="Коля" class="participant-avatar" />
-              <div class="participant-info">
-                <div class="participant-name">Коля</div>
-                <div class="participant-status">У мережі</div>
-              </div>
-            </div>
-            <div class="participant">
-              <img src="" alt="Віталя" class="participant-avatar" />
-              <div class="participant-info">
-                <div class="participant-name">Віталя</div>
-                <div class="participant-status">Був 2 хвилини тому</div>
-              </div>
-            </div>
-            <div class="participant">
-              <img src="" alt="Чорний" class="participant-avatar" />
-              <div class="participant-info">
-                <div class="participant-name">Чорний</div>
-                <div class="participant-status">Був вчора</div>
-              </div>
-            </div> -->
-          </div>
+          <div id="participantsList"></div>
         </div>
       </div>
     </div>

@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="./views/styles/main.css" />
     <link rel="stylesheet" href="./views/styles/dropdown.css" />
     <link rel="stylesheet" href="./views/styles/modalwindows.css" />
+    <link rel="stylesheet" href="./views/styles/messagesStyle.css" />
     <!-- <link rel="manifest" href="./manifest.json" /> -->
     <script
       src="https://kit.fontawesome.com/12f39570aa.js"
@@ -42,7 +43,7 @@
             <span class="close">&times;</span>
 
             <div class="modal-login-header">
-              Login
+              LogIn
             </div>
 
             <form id="loginForm" method="POST" action="index.php">
@@ -80,7 +81,7 @@
     </div>
 
     <script>window.isAuth = <?= isAuthorized() ? "true" : "false" ?></script>
-    <!-- <script>window.authUserId = <?= isAuthorized() ? $_SESSION['user']['id'] : null ?></script> -->
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
     <script src="./scripts/studentspage.js"></script>
     <script type="module" src="./scripts/loadcontent.js"></script>
   </body>
