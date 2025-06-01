@@ -1,11 +1,11 @@
 const socket = io("http://localhost:3000");
 
 socket.on("connectionConfirmed", (data) => {
-  console.log("✅ Connection confirmed:", data);
+  console.log("Connection confirmed:", data);
 });
 
 socket.on("disconnect", () => {
-  console.log("❌ Disconnected from server");
+  console.log("Disconnected from server");
 });
 
 let selectedUsers = [];
@@ -18,6 +18,63 @@ const currentChat = {
   description: "",
   participants: [],
 };
+
+export function refreshEventListeners() {
+  const createChatBtn = document.querySelector(".create-chat-btn");
+  const chatStatus = document.getElementById("current-chat-status");
+  const closeCreateChatModalBtn = document.querySelector(
+    "#createChatModal .close"
+  );
+  const closeAddUserModalBtn = document.querySelector("#addUsersModal .close");
+  const closeChatInfoModalBtn = document.querySelector("#chatInfoModal .close");
+  const confirmAddUsersBtn = document.querySelector(
+    "#createChatModal .modal-btn"
+  );
+  const searchUsersInput = document.querySelector(
+    "#addUsersModal .user-search input"
+  );
+  const confirmCreateChatBtn = document.querySelector(
+    "#addUsersModal .modal-btn"
+  );
+  const addNewUsersToChat = document.querySelector(
+    "#chatInfoModal .add-participant-btn"
+  );
+  const sendMessageBtn = document.querySelector(".send-button");
+
+  createChatBtn.addEventListener("click", openCreateChatModal);
+  chatStatus.addEventListener("click", openChatInfoModal);
+  closeCreateChatModalBtn.addEventListener("click", closeCreateChatModal);
+  closeAddUserModalBtn.addEventListener("click", () => {
+    closeModal("addUsersModal");
+  });
+  closeChatInfoModalBtn.addEventListener("click", () => {
+    closeModal("chatInfoModal");
+  });
+  confirmAddUsersBtn.addEventListener("click", proceedToAddUsers);
+  searchUsersInput.addEventListener("input", searchUsers);
+  confirmCreateChatBtn.addEventListener("click", () => {
+    if (selectedUsers.length === 0) {
+      alert("Будь ласка, виберіть хоча б одного учасника");
+      return;
+    }
+
+    const modal = document.getElementById("addUsersModal");
+    const mode = modal.dataset.mode;
+
+    if (mode === "create") {
+      createChat();
+    } else if (mode === "add") {
+      const chatId = modal.dataset.chatId;
+      addUsersToExistingChat(chatId);
+    }
+
+    closeModal("addUsersModal");
+  });
+  addNewUsersToChat.addEventListener("click", () => {
+    openAddUsersModal(false, currentChat.id);
+  });
+  sendMessageBtn.addEventListener("click", sendMessage);
+}
 
 function openCreateChatModal() {
   document.getElementById("createChatModal").style.display = "block";
@@ -73,17 +130,21 @@ export function generateAvatarData(name) {
 function proceedToAddUsers() {
   const chatName = document.getElementById("chatName").value;
   if (!chatName.trim()) {
-    alert("Будь ласка, введіть назву чату");
+    alert("Please enter a chat name");
     return;
   }
   closeCreateChatModal();
   openAddUsersModal(true);
 }
 
-function openAddUsersModal(isNewChat = false) {
+function openAddUsersModal(isNewChat = false, chatId = null) {
+  const modal = document.getElementById("addUsersModal");
   if (isNewChat) {
     getAvailableUsersList();
+    modal.dataset.mode = "create";
   } else {
+    modal.dataset.mode = "add";
+    modal.dataset.chatId = chatId;
     getAvailableUsersList(currentChat.participants);
     closeModal("chatInfoModal");
   }
@@ -92,7 +153,7 @@ function openAddUsersModal(isNewChat = false) {
     item.classList.remove("selected");
   });
 
-  document.getElementById("addUsersModal").style.display = "block";
+  modal.style.display = "block";
 }
 
 function getAvailableUsersList(alreadyAdded = []) {
@@ -184,37 +245,130 @@ function searchUsers() {
   });
 }
 
-function createChat() {
-  if (selectedUsers.length === 0) {
-    alert("Будь ласка, виберіть хоча б одного учасника");
-    return;
-  }
+async function createChat() {
+  try {
+    selectedUsers.push(window.authUserId);
 
-  selectedUsers.push(window.authUserId);
-
-  fetch(`http://localhost:3000/api/chats/`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      name: chatNameInputValue,
-      description: chatDescriptionInputValue,
-      users: selectedUsers,
-    }),
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      console.log(data);
-      alert(
-        `Чат "${chatNameInputValue}" створено з ${selectedUsers.length} учасниками!`
+    const socketResponse = await new Promise((resolve) => {
+      socket.emit(
+        "createChat",
+        window.authUserId,
+        chatNameInputValue,
+        chatDescriptionInputValue,
+        selectedUsers,
+        (response) => {
+          resolve(response);
+        }
       );
-      closeModal("addUsersModal");
-    })
-    .catch((err) => console.error("Сталася помилка:", err));
+    });
+
+    if (!socketResponse.success) {
+      console.error("Failed to create users:", socketResponse.error);
+      return;
+    }
+
+    const chats = await getCurrentUserChats(window.authUserId);
+    UpdateChatsAndNotifications(chats);
+  } catch (error) {
+    console.error("addUsersToExistingChat failed:", error);
+  }
 }
 
-export function selectChat(chatElement) {
+async function addUsersToExistingChat(chatId) {
+  try {
+    const socketResponse = await new Promise((resolve) => {
+      socket.emit("addUsersToChat", chatId, selectedUsers, (response) => {
+        resolve(response);
+      });
+    });
+
+    if (!socketResponse.success) {
+      console.error("Failed to add users:", socketResponse.error);
+      return;
+    }
+    return socketResponse.chat;
+  } catch (error) {
+    console.error("addUsersToExistingChat failed:", error);
+  }
+}
+
+export async function UpdateChatsAndNotifications(
+  chats,
+  onlyNotificationsUpdate = false
+) {
+  const chatListContainer = document.querySelector(".chat-list");
+  let chatElements = null;
+
+  if (chatListContainer) {
+    if (chats.length === 0) {
+      chatListContainer.innerHTML = "<p>У вас ще немає чатів</p>";
+      return;
+    }
+
+    if (!onlyNotificationsUpdate) {
+      chatListContainer.innerHTML = "";
+
+      const fragment = document.createDocumentFragment();
+
+      chats.forEach((chat) => {
+        fragment.appendChild(renderChatItem(chat));
+      });
+
+      chatListContainer.appendChild(fragment);
+    }
+
+    chatElements = chatListContainer.querySelectorAll(".chat-list-item");
+  }
+
+  await renderUserNotifications(window.authUserId, chatElements);
+
+  if (chatElements) {
+    chatElements.forEach((chatItem) => {
+      chatItem.addEventListener("click", () => {
+        selectChat(chatItem);
+      });
+    });
+  }
+}
+
+function renderChatItem(chat) {
+  const template = document.getElementById("chatListItemTemplate");
+  const clone = template.content.cloneNode(true);
+
+  const chatListItem = clone.querySelector(".chat-list-item");
+  chatListItem.id = chat._id;
+
+  const avatarElement = clone.querySelector(".avatar-circle");
+  const { initials, color } = generateAvatarData(chat.name);
+  avatarElement.textContent = initials;
+  avatarElement.style.backgroundColor = color;
+
+  clone.querySelector(".chat-name-item").textContent = chat.name;
+
+  const chatPreviewElement = clone.querySelector(".chat-preview");
+  const chatPreviewAuthor = chatPreviewElement.querySelector(".message-author");
+  const chatPreviewMessage = chatPreviewElement.querySelector(".message-text");
+
+  if (chat.lastMessage) {
+    const preview = shortenPreviewText(
+      chat.lastMessage.authorName,
+      chat.lastMessage.text
+    );
+
+    chatPreviewAuthor.textContent = preview.author;
+    chatPreviewMessage.textContent = preview.text;
+  } else {
+    chatPreviewAuthor.textContent = "";
+    chatPreviewMessage.textContent = "Чат створено";
+  }
+
+  const timeElement = clone.querySelector(".chat-last-message-time");
+  updateChatListItemTime(timeElement, chat.lastActivityAt);
+
+  return clone;
+}
+
+export async function selectChat(chatElement) {
   const chatMessagesContainer = document.querySelector(".chat-main-container");
 
   clearChat();
@@ -250,7 +404,7 @@ export function selectChat(chatElement) {
 
   document.getElementById("current-chat-name").textContent = currentChat.name;
 
-  document.getElementById("current-chat-status").textContent = "members";
+  document.getElementById("current-chat-status").textContent = "Members";
   document.getElementById("current-chat-status").style.cursor = "pointer";
 
   document.querySelector(".empty-chat-header").style.display = "none";
@@ -274,12 +428,8 @@ export function selectChat(chatElement) {
     setNotificationsCount(updatedUnreadMessagesCount);
     showNotifications();
 
-    const notifsNumber = chatElement.querySelector(
-      ".chat-notifications-number"
-    );
-    notifsNumber.style.display = "none";
-    notifsNumber.textContent = "0";
-    chatElement.classList.remove("unread");
+    const chats = await getCurrentUserChats(window.authUserId);
+    UpdateChatsAndNotifications(chats, true);
   }
 }
 
@@ -358,13 +508,8 @@ function sendMessage() {
       clearTimeout(timeout);
 
       if (response.success) {
-        console.log("✅ Message sent successfully");
-        console.log(
-          `Delivered to ${response.deliveredTo}/${response.totalUsers} users`
-        );
         resolve(response.message);
       } else {
-        console.error("❌ Failed to send message:", response.error);
         reject(new Error(response.error));
       }
     });
@@ -467,46 +612,6 @@ function closeModal(id) {
   document.getElementById(id).style.display = "none";
 }
 
-export function refreshEventListeners() {
-  const createChatBtn = document.querySelector(".create-chat-btn");
-  const chatStatus = document.getElementById("current-chat-status");
-  const closeCreateChatModalBtn = document.querySelector(
-    "#createChatModal .close"
-  );
-  const closeAddUserModalBtn = document.querySelector("#addUsersModal .close");
-  const closeChatInfoModalBtn = document.querySelector("#chatInfoModal .close");
-  const confirmAddUsersBtn = document.querySelector(
-    "#createChatModal .modal-btn"
-  );
-  const searchUsersInput = document.querySelector(
-    "#addUsersModal .user-search input"
-  );
-  const confirmCreateChatBtn = document.querySelector(
-    "#addUsersModal .modal-btn"
-  );
-  const addNewUsersToChat = document.querySelector(
-    "#chatInfoModal .add-participant-btn"
-  );
-  const sendMessageBtn = document.querySelector(".send-button");
-
-  createChatBtn.addEventListener("click", openCreateChatModal);
-  chatStatus.addEventListener("click", openChatInfoModal);
-  closeCreateChatModalBtn.addEventListener("click", closeCreateChatModal);
-  closeAddUserModalBtn.addEventListener("click", () => {
-    closeModal("addUsersModal");
-  });
-  closeChatInfoModalBtn.addEventListener("click", () => {
-    closeModal("chatInfoModal");
-  });
-  confirmAddUsersBtn.addEventListener("click", proceedToAddUsers);
-  searchUsersInput.addEventListener("input", searchUsers);
-  confirmCreateChatBtn.addEventListener("click", createChat);
-  addNewUsersToChat.addEventListener("click", () => {
-    openAddUsersModal();
-  });
-  sendMessageBtn.addEventListener("click", sendMessage);
-}
-
 export async function getCurrentUserChats(userId) {
   try {
     const socketResponse = await new Promise((resolve) => {
@@ -536,8 +641,6 @@ export function connectUser(userId) {
 }
 
 export async function renderUserNotifications(userId, chatElements = null) {
-  const currentUrlParams = new URLSearchParams(window.location.search);
-  const currentPage = currentUrlParams.get("page");
   const userNotifications = await getUserNotifications(userId);
 
   setNotificationsCount(userNotifications.length);
@@ -551,7 +654,7 @@ export async function renderUserNotifications(userId, chatElements = null) {
     notificationsByChatId.get(chatId).push(notif);
   });
 
-  if (currentPage === "messages" && chatElements !== null) {
+  if (chatElements !== null) {
     chatElements.forEach((chatElement) => {
       const notifsArray = notificationsByChatId.get(chatElement.id);
       const unreadCount = notifsArray ? notifsArray.length : 0;
@@ -559,21 +662,19 @@ export async function renderUserNotifications(userId, chatElements = null) {
     });
   }
 
-  const sortedChats = [...notificationsByChatId.entries()]
-    .sort((a, b) => {
-      const aLast = new Date(a[1][0].chat.lastActivityAt);
-      const bLast = new Date(b[1][0].chat.lastActivityAt);
-      return bLast - aLast;
-    })
+  const chats = await getCurrentUserChats(userId);
+
+  const chatsNotByMe = chats
+    .filter(
+      (chat) =>
+        chat.lastMessage?.authorId.toString() !== window.authUserId.toString()
+    )
     .slice(0, 3);
 
-  sortedChats.forEach(([chatId, notifications]) => {
-    const latestNotif = notifications.sort(
-      (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
-    )[0];
-
-    const chatName = latestNotif.chat.name;
-    updateLastMessagesMenu(latestNotif.chat.lastMessage, chatName, chatId);
+  chatsNotByMe.forEach((chat) => {
+    const notifsArray = notificationsByChatId.get(chat._id);
+    const unreadCount = notifsArray ? notifsArray.length : 0;
+    updateLastMessagesMenu(chat.lastMessage, chat.name, chat._id, unreadCount);
   });
 
   showNotifications();
@@ -607,7 +708,7 @@ function updateChatListItemNotifications(chatElement, unreadCount) {
     chatElement.classList.add("unread");
     notificationElement.style.display = "flex";
   } else {
-    notificationElement.textContent = "";
+    notificationElement.textContent = "0";
     chatElement.classList.remove("unread");
     notificationElement.style.display = "none";
   }
@@ -629,7 +730,7 @@ export function shortenPreviewText(authorName, messageText, maxLength = 30) {
 
   if (fullText.length <= maxLength) {
     return {
-      author: authorName + ":",
+      author: authorName === "" ? authorName : authorName + ":",
       text: messageText,
     };
   }
@@ -642,15 +743,44 @@ export function shortenPreviewText(authorName, messageText, maxLength = 30) {
   }
 
   return {
-    author: authorName + ":",
+    author: authorName === "" ? authorName : authorName + ":",
     text: shortenedText,
   };
 }
 
-function updateLastMessagesMenu(newMessage, chatName, chatId) {
+export async function updateLastMessagesMenu(
+  newMessage,
+  chatName,
+  chatId,
+  unreadCount = 0
+) {
+  if (!chatId) return;
+  if (!newMessage) {
+    newMessage = {};
+    newMessage.authorName = "";
+    newMessage.text = "Чат створено";
+
+    try {
+      const socketResponse = await new Promise((resolve) => {
+        socket.emit("getChatInfo", chatId, (response) => {
+          resolve(response);
+        });
+      });
+
+      if (!socketResponse.success) {
+        console.error("Failed to get chat info message:", socketResponse.error);
+        return;
+      }
+
+      newMessage.createdAt = socketResponse.chat.lastActivityAt;
+    } catch (error) {
+      console.error("getChatInfo failed:", error);
+    }
+  }
+
   const lastMessagesMenu = document.querySelector(".dropdown-content-messages");
 
-  lastMessagesByChat[chatId] = { newMessage, chatName, chatId };
+  lastMessagesByChat[chatId] = { newMessage, chatName, chatId, unreadCount };
 
   const latestMessages = Object.values(lastMessagesByChat)
     .sort(
@@ -665,7 +795,8 @@ function updateLastMessagesMenu(newMessage, chatName, chatId) {
     const menuItem = renderLastMessagesMenuItem(
       messageData.newMessage,
       messageData.chatName,
-      messageData.chatId
+      messageData.chatId,
+      messageData.unreadCount
     );
     lastMessagesMenu.appendChild(menuItem);
   });
@@ -680,7 +811,14 @@ function updateLastMessagesMenu(newMessage, chatName, chatId) {
     );
 }
 
-function renderLastMessagesMenuItem(messageData, chatName, chatId) {
+function renderLastMessagesMenuItem(
+  messageData,
+  chatName,
+  chatId,
+  unreadCount = 0
+) {
+  if (!chatId) return null;
+
   const template = document.getElementById("lastMessagesMenuItemTemplate");
   const clone = template.content.cloneNode(true);
 
@@ -694,8 +832,7 @@ function renderLastMessagesMenuItem(messageData, chatName, chatId) {
   const timeElement = clone.querySelector(".message-time-menu");
   timeElement.textContent = formatMessageTime(messageData.createdAt);
 
-  const preview = clone.querySelector(".received-message-preview");
-  const authorSpan = document.createElement("span");
+  const authorSpan = clone.querySelector(".message-author-preview");
   const { author, text } = shortenPreviewText(
     messageData.authorName,
     messageData.text
@@ -704,13 +841,19 @@ function renderLastMessagesMenuItem(messageData, chatName, chatId) {
   authorSpan.className = "message-author-preview";
   authorSpan.textContent = author;
 
-  const textSpan = document.createElement("span");
-  textSpan.className = "message-text-preview";
+  const textSpan = clone.querySelector(".message-text-preview");
   textSpan.textContent = text;
 
-  preview.innerHTML = "";
-  preview.appendChild(authorSpan);
-  preview.appendChild(textSpan);
+  const notificationsNumber = clone.querySelector(".chat-notifications-number");
+  if (unreadCount > 0) {
+    notificationsNumber.textContent = unreadCount.toString();
+    notificationsNumber.style.display = "flex";
+    clone.querySelector("li").classList.add("unread");
+  } else {
+    notificationsNumber.textContent = "0";
+    notificationsNumber.style.display = "none";
+    clone.querySelector("li").classList.remove("unread");
+  }
 
   clone.querySelector("li").setAttribute("data-chat-id", chatId);
 
@@ -780,7 +923,7 @@ function showNotifications(addNew = false) {
   } else notificationIndicator.style.display = "none";
 }
 
-socket.on("messageReceived", (response) => {
+socket.on("messageReceived", async (response) => {
   const currentUrlParams = new URLSearchParams(window.location.search);
   const currentPage = currentUrlParams.get("page");
 
@@ -794,52 +937,17 @@ socket.on("messageReceived", (response) => {
     chatMessagesContainer.appendChild(renderMessage(response.message));
     scrollToBottom(chatMessagesContainer, true);
     markChatAsViewed(currentChat.id, window.authUserId);
-
-    const chatElement = document.getElementById(
-      `${response.message.chatId._id}`
-    );
-    const timeElement = chatElement.querySelector(".chat-last-message-time");
-    updateChatListItemTime(timeElement, response.message.createdAt);
   } else if (
     response.message.authorId.toString() !== window.authUserId.toString()
   ) {
-    updateLastMessagesMenu(
-      response.message,
-      response.message.chatId.name,
-      response.message.chatId._id
-    );
-
     showNotifications(true);
-
-    if (currentPage === "messages") {
-      const chatElement = document.getElementById(
-        `${response.message.chatId._id}`
-      );
-      let unreadMessagesCount = parseInt(
-        chatElement.querySelector(".chat-notifications-number").textContent
-      );
-      unreadMessagesCount = isNaN(unreadMessagesCount)
-        ? 1
-        : unreadMessagesCount + 1;
-
-      const timeElement = chatElement.querySelector(".chat-last-message-time");
-      updateChatListItemTime(timeElement, response.message.createdAt);
-      updateChatListItemNotifications(chatElement, unreadMessagesCount);
-
-      const chatPreviewAuthor = chatElement.querySelector(".message-author");
-      const chatPreviewMessage = chatElement.querySelector(".message-text");
-
-      const preview = shortenPreviewText(
-        response.message.authorName,
-        response.message.text
-      );
-
-      chatPreviewAuthor.textContent = preview.author;
-      chatPreviewMessage.textContent = preview.text;
-    }
   }
+
+  const chats = await getCurrentUserChats(window.authUserId);
+  UpdateChatsAndNotifications(chats);
 });
 
-socket.on("newChat", (chatData) => {
-  renderChatItem(chatData);
+socket.on("addedToNewChat", async () => {
+  const chats = await getCurrentUserChats(window.authUserId);
+  UpdateChatsAndNotifications(chats);
 });

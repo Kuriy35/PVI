@@ -1,5 +1,4 @@
 const ChatRoom = require("../models/chat-room");
-const mongoose = require("mongoose");
 
 const createChat = async (req, res) => {
   try {
@@ -17,7 +16,7 @@ const createChat = async (req, res) => {
     const chat = new ChatRoom({ name, description, users });
     await chat.save();
 
-    req.io.emit("addedToChat", chat);
+    // req.io.emit("addedToChat", chat);
 
     res.status(201).json(chat);
   } catch (err) {

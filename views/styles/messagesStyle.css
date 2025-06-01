@@ -150,7 +150,7 @@ h1 {
 }
 
 .chat-name-item {
-  font-weight: 500;
+  font-weight: 600;
   color: #2c3e50;
 }
 
@@ -164,7 +164,6 @@ chat-preview {
 }
 
 .chat-preview .message-author {
-  font-weight: 600;
   color: #34495e;
   white-space: nowrap;
   overflow: hidden;
@@ -209,6 +208,7 @@ chat-preview {
   color: white;
   border-radius: 10px;
   font-size: 12px;
+  flex-shrink: 0;
 }
 
 .chat-list-item.active .chat-last-message-time {

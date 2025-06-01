@@ -54,83 +54,18 @@ function loadStudentsPage(tablePageNumber = 1, tablePageSize = 8) {
     .catch((error) => console.error("Error loading students:", error));
 }
 
+window.loadStudentsPage = loadStudentsPage;
+
 async function loadMessagesPage() {
   await loadUserChats();
   chatServiceModule.refreshEventListeners();
 }
 
-function loadUserChats() {
+async function loadUserChats() {
   if (!window.authUserId) return;
 
-  return chatServiceModule
-    .getCurrentUserChats(window.authUserId)
-    .then((data) => {
-      renderChatList(data);
-    })
-    .catch((err) => console.error("Failed to load chats", err));
-}
-
-function renderChatList(chats) {
-  const chatListContainer = document.querySelector(".chat-list");
-  chatListContainer.innerHTML = "";
-  if (chats.length === 0) {
-    chatListContainer.innerHTML = "<p>У вас ще немає чатів</p>";
-    return;
-  }
-
-  const fragment = document.createDocumentFragment();
-
-  chats.forEach((chat) => {
-    fragment.appendChild(renderChatItem(chat));
-  });
-
-  chatListContainer.appendChild(fragment);
-
-  const chatElements = chatListContainer.querySelectorAll(".chat-list-item");
-  chatServiceModule.renderUserNotifications(window.authUserId, chatElements);
-
-  chatElements.forEach((chatItem) => {
-    chatItem.addEventListener("click", () => {
-      chatServiceModule.selectChat(chatItem);
-    });
-  });
-}
-
-function renderChatItem(chat) {
-  const template = document.getElementById("chatListItemTemplate");
-  const clone = template.content.cloneNode(true);
-
-  const chatListItem = clone.querySelector(".chat-list-item");
-  chatListItem.id = chat._id;
-
-  const avatarElement = clone.querySelector(".avatar-circle");
-  const { initials, color } = chatServiceModule.generateAvatarData(chat.name);
-  avatarElement.textContent = initials;
-  avatarElement.style.backgroundColor = color;
-
-  clone.querySelector(".chat-name-item").textContent = chat.name;
-
-  const chatPreviewElement = clone.querySelector(".chat-preview");
-  const chatPreviewAuthor = chatPreviewElement.querySelector(".message-author");
-  const chatPreviewMessage = chatPreviewElement.querySelector(".message-text");
-
-  if (chat.lastMessage) {
-    const preview = chatServiceModule.shortenPreviewText(
-      chat.lastMessage.authorName,
-      chat.lastMessage.text
-    );
-
-    chatPreviewAuthor.textContent = preview.author;
-    chatPreviewMessage.textContent = preview.text;
-  } else {
-    chatPreviewAuthor.textContent = "";
-    chatPreviewMessage.textContent = "Немає повідомлень";
-  }
-
-  const timeElement = clone.querySelector(".chat-last-message-time");
-  chatServiceModule.updateChatListItemTime(timeElement, chat.lastActivityAt);
-
-  return clone;
+  const chats = await chatServiceModule.getCurrentUserChats(window.authUserId);
+  await chatServiceModule.UpdateChatsAndNotifications(chats);
 }
 
 function renderStudentsTable(students) {
@@ -265,11 +200,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     loadStudentsPage(tablePageNumber, tablePageSize);
   } else if (currentPage === "messages") {
     await loadMessagesPage();
-  }
-
-  await chatServiceModule.renderUserNotifications(window.authUserId);
-
-  if (currentPage === "messages") {
     let activeChatId = currentUrlParams.get("chat");
     const activeChatElement = document.getElementById(`${activeChatId}`);
     if (activeChatElement) activeChatElement.click();
@@ -311,6 +241,7 @@ async function setAuthUserData() {
 
     if (window.authUserId) {
       chatServiceModule.connectUser(window.authUserId);
+      chatServiceModule.renderUserNotifications(window.authUserId);
     }
   } catch (error) {
     console.error("Failed to set auth user data:", error);

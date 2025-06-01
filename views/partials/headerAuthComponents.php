@@ -5,9 +5,12 @@
                 <div class="chat-name-preview"></div>
                 <div class="message-time-menu"></div>
               </div>
-              <div class="received-message-preview">
-                <span class="message-author-preview"></span>
-                <span class="message-text-preview"></span>
+              <div class="received-preview-container">
+                <div class="received-message-preview">
+                  <span class="message-author-preview"></span>
+                  <span class="message-text-preview"></span>
+                </div>
+                <div class="chat-notifications-number"></div>
               </div>
             </li>
           </template>

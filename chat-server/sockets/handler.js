@@ -9,38 +9,31 @@ module.exports = (io, onlineUsers) => {
     socket.emit("connectionConfirmed", { socketId: socket.id });
 
     socket.on("error", (error) => {
-      console.error("❌ Socket error:", error);
+      console.error("Socket error:", error);
     });
 
-    // Обробка підключення користувача
     socket.on("userConnected", (userId) => {
       onlineUsers.set(userId, socket.id);
-      console.log(`👤 User ${userId} connected with socket ${socket.id}`);
+      console.log(`User ${userId} connected with socket ${socket.id}`);
       console.log("Online users:", Array.from(onlineUsers.entries()));
     });
 
-    // Обробка відключення користувача
     socket.on("disconnect", () => {
-      console.log(`🔌 Socket ${socket.id} disconnected`);
+      console.log(`Socket ${socket.id} disconnected`);
       for (let [userId, socketId] of onlineUsers.entries()) {
         if (socketId === socket.id) {
           onlineUsers.delete(userId);
-          console.log(`👤 User ${userId} removed from online users`);
+          console.log(`User ${userId} removed from online users`);
           break;
         }
       }
       console.log("Remaining online users:", Array.from(onlineUsers.entries()));
     });
 
-    // Функція надсилання повідомлень через Socket.IO
-    // handler.js
     socket.on("sendMessage", async (messageData, callback) => {
       try {
-        console.log("📨 Sending message via Socket.IO:", messageData);
-
         const { chatId, authorId, authorName, text } = JSON.parse(messageData);
 
-        // Валідація
         if (!chatId) {
           return callback({
             success: false,
@@ -72,7 +65,6 @@ module.exports = (io, onlineUsers) => {
           });
         }
 
-        // Знаходимо чат спочатку
         const chat = await ChatRoom.findById(chatId);
         if (!chat) {
           return callback({
@@ -81,14 +73,11 @@ module.exports = (io, onlineUsers) => {
           });
         }
 
-        // Зберігаємо повідомлення в БД
         const message = new Message({ chatId, authorId, authorName, text });
         await message.save();
 
         const msg = await Message.findById(message._id).populate("chatId");
-        console.log("✅ Message saved to DB:", msg.toObject());
 
-        // Оновлюємо чат з останньою активністю та останнім повідомленням
         await ChatRoom.findByIdAndUpdate(
           chatId,
           {
@@ -97,9 +86,7 @@ module.exports = (io, onlineUsers) => {
           },
           { new: true }
         );
-        console.log("✅ Chat room updated with last activity and message");
 
-        // Створюємо нотифікацію для всіх учасників чату, крім автора
         const receivers = chat.users.filter(
           (userId) => userId.toString() !== authorId.toString()
         );
@@ -108,32 +95,20 @@ module.exports = (io, onlineUsers) => {
           unseenBy: receivers,
         });
         await notification.save();
-        console.log("✅ Notification saved");
 
-        // Відправляємо повідомлення всім онлайн учасникам чату
         let deliveredCount = 0;
         chat.users.forEach((userId) => {
           if (onlineUsers.has(userId.toString())) {
             const userSocketId = onlineUsers.get(userId.toString());
-            console.log(
-              `📤 Sending to user ${userId} with socket ${userSocketId}`
-            );
 
             io.to(userSocketId).emit("messageReceived", {
               message: msg.toObject(),
             });
 
             deliveredCount++;
-          } else {
-            console.log(`❌ User ${userId} not online`);
           }
         });
 
-        console.log(
-          `✅ Message delivered to ${deliveredCount}/${chat.users.length} users`
-        );
-
-        // Повертаємо успіх автору
         callback({
           success: true,
           message: msg.toObject(),
@@ -141,7 +116,7 @@ module.exports = (io, onlineUsers) => {
           totalUsers: chat.users.length,
         });
       } catch (error) {
-        console.error("❌ Error sending message via Socket.IO:", error);
+        console.error("Error sending message via Socket.IO:", error);
         callback({
           success: false,
           error: error.message,
@@ -180,8 +155,6 @@ module.exports = (io, onlineUsers) => {
     });
 
     socket.on("messagesViewed", async (chatId, userId, callback) => {
-      console.log(`👁️ Messages viewed by ${userId} in chat ${chatId}`);
-
       try {
         await Notification.updateMany(
           { chat: chatId },
@@ -193,25 +166,12 @@ module.exports = (io, onlineUsers) => {
           unseenBy: { $size: 0 },
         });
 
-        console.log("✅ Notifications updated");
-
         callback({ success: true });
       } catch (error) {
-        console.error("❌ Error updating notifications:", error);
+        console.error("Error updating notifications:", error);
 
         callback({ success: false, error: error.message });
       }
-    });
-
-    // Обробка додавання до нового чату
-    socket.on("addedToChat", (chatData) => {
-      console.log("👥 User added to chat:", chatData);
-      chatData.users.forEach((userId) => {
-        if (onlineUsers.has(userId.toString())) {
-          const userSocketId = onlineUsers.get(userId);
-          io.to(userSocketId).emit("newChat", chatData);
-        }
-      });
     });
 
     socket.on("getChatInfo", async (chatId, callback) => {
@@ -247,7 +207,7 @@ module.exports = (io, onlineUsers) => {
         });
 
         callback({
-          success: true, // Додано success: true
+          success: true,
           chat: chat.toObject(),
           participantsWithStatus: participantsWithStatus,
         });
@@ -281,6 +241,131 @@ module.exports = (io, onlineUsers) => {
         });
       } catch (error) {
         console.error("Failed to get chats list:", error);
+        callback({
+          success: false,
+          error: error.message,
+        });
+      }
+    });
+
+    socket.on(
+      "createChat",
+      async (creatorId, name, description, users, callback) => {
+        try {
+          if (!name) {
+            return callback({
+              success: false,
+              error: "Chat name is required!",
+            });
+          }
+
+          if (!Array.isArray(users) || users.length < 2) {
+            return callback({
+              success: false,
+              error: "Users is required!",
+            });
+          }
+
+          const chat = new ChatRoom({ name, description, users });
+          await chat.save();
+
+          if (!chat) {
+            return callback({
+              success: false,
+              error: "Failed to create chat",
+            });
+          }
+
+          const receivers = chat.users.filter(
+            (userId) => userId.toString() !== creatorId.toString()
+          );
+
+          const notification = new Notification({
+            chat: chat._id,
+            unseenBy: receivers,
+          });
+          await notification.save();
+
+          users.forEach((userId) => {
+            if (onlineUsers.has(userId.toString())) {
+              const userSocketId = onlineUsers.get(userId.toString());
+
+              io.to(userSocketId).emit("addedToNewChat");
+            }
+          });
+
+          callback({
+            success: true,
+            chat: chat.toObject(),
+          });
+        } catch (error) {
+          console.error("Failed to create chat using Socket.IO:", error);
+          callback({
+            success: false,
+            error: error.message,
+          });
+        }
+      }
+    );
+
+    socket.on("addUsersToChat", async (chatId, newUsers, callback) => {
+      try {
+        if (!chatId) {
+          return callback({
+            success: false,
+            error: "Chat ID is required!",
+          });
+        }
+
+        if (!Array.isArray(newUsers) || newUsers.length === 0) {
+          return callback({
+            success: false,
+            error: "At least one user must be added!",
+          });
+        }
+
+        const chat = await ChatRoom.findById(chatId);
+        if (!chat) {
+          return callback({
+            success: false,
+            error: "Chat not found!",
+          });
+        }
+
+        const existingUserIds = new Set(chat.users.map((u) => u.toString()));
+        const usersToAdd = newUsers.filter(
+          (userId) => !existingUserIds.has(userId.toString())
+        );
+
+        if (usersToAdd.length === 0) {
+          return callback({
+            success: false,
+            error: "All selected users are already in the chat!",
+          });
+        }
+
+        chat.users.push(...usersToAdd);
+        await chat.save();
+
+        const notification = new Notification({
+          chat: chatId,
+          unseenBy: newUsers,
+        });
+        await notification.save();
+
+        usersToAdd.forEach((userId) => {
+          if (onlineUsers.has(userId.toString())) {
+            const userSocketId = onlineUsers.get(userId.toString());
+            io.to(userSocketId).emit("addedToNewChat", chat.toObject());
+          }
+        });
+
+        callback({
+          success: true,
+          chat: chat.toObject(),
+        });
+      } catch (error) {
+        console.error("Failed to add users to chat using Socket.IO:", error);
         callback({
           success: false,
           error: error.message,
